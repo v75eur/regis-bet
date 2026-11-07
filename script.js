@@ -1,4 +1,6 @@
 const SECRET = "reg@@s";
+let currentMode = "total";
+let currentVariation = 0;
 
 function checkPassword() {
     const pwd = document.getElementById("password-input").value;
@@ -15,14 +17,22 @@ function limitCheckboxes(selectedId) {
     let count = chks.filter(id => document.getElementById(id).checked).length;
     if (count > 2) {
         document.getElementById(selectedId).checked = false;
-        alert("Vous ne pouvez choisir que 2 conditions maximum.");
+        alert("Choisissez 2 conditions maximum.");
     }
 }
 
-function toggleInputs() {
-    const mode = document.querySelector('input[name="mode"]:checked').value;
+function setMode(mode) {
+    currentMode = mode;
+    document.getElementById("btn-mode-total").classList.toggle("active", mode === "total");
+    document.getElementById("btn-mode-gain").classList.toggle("active", mode === "gain");
     document.getElementById("input-total").style.display = (mode === "total") ? "block" : "none";
     document.getElementById("input-gain").style.display = (mode === "gain") ? "block" : "none";
+}
+
+function setVariation(val, btn) {
+    currentVariation = val;
+    document.querySelectorAll(".variation-switch button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
 }
 
 function calculer() {
@@ -35,53 +45,46 @@ function calculer() {
     const coteNul = parseFloat(document.getElementById("cote-nul").value);
 
     let selected = [];
-    if (chkForte) selected.push({ name: "Victoire Forte", cote: coteForte });
-    if (chkFaible) selected.push({ name: "Victoire Faible", cote: coteFaible });
-    if (chkNul) selected.push({ name: "Match Nul", cote: coteNul });
+    if (chkForte) selected.push({ name: "Forte", cote: coteForte });
+    if (chkFaible) selected.push({ name: "Faible", cote: coteFaible });
+    if (chkNul) selected.push({ name: "Nul", cote: coteNul });
 
-    if (selected.length !== 2) { alert("Veuillez cocher exactement 2 conditions."); return; }
-    if (selected.some(c => isNaN(c.cote) || c.cote <= 1)) { alert("Veuillez entrer des cotes valides (supérieures à 1)."); return; }
+    const resDiv = document.getElementById("resultats");
+    const resContent = document.getElementById("resultat-contenu");
+    
+    resDiv.style.display = "none"; // On cache avant de calculer
+
+    if (selected.length !== 2) { alert("Cochez exactement 2 conditions."); return; }
+    if (selected.some(c => isNaN(c.cote) || c.cote <= 1)) { alert("Entrez des cotes valides (> 1)."); return; }
 
     const c1 = selected[0].cote;
     const c2 = selected[1].cote;
     const marge = (1 / c1) + (1 / c2);
 
-    const resDiv = document.getElementById("resultats");
-    const resContent = document.getElementById("resultat-contenu");
-
     if (marge >= 1) {
         resDiv.style.display = "block";
-        resContent.innerHTML = `
-            <p class="danger"><strong>Impossible de garantir un gain !</strong></p>
-            <p>La somme des probabilités (${marge.toFixed(4)}) est supérieure ou égale à 1.</p>
-            <p>Les cotes ne permettent pas une répartition gagnante.</p>
-        `;
+        resContent.innerHTML = `<p class="danger"><strong>Impossible de garantir un gain !</strong><br>Marge bookmaker trop élevée (${(marge*100).toFixed(1)}%).</p>`;
         return;
     }
 
-    const variation = parseFloat(document.querySelector('input[name="variation"]:checked').value);
-    const mode = document.querySelector('input[name="mode"]:checked').value;
     let montantTotal;
-
-    if (mode === "total") {
+    if (currentMode === "total") {
         montantTotal = parseFloat(document.getElementById("montant-total").value);
-        if (isNaN(montantTotal) || montantTotal <= 0) { alert("Montant total invalide."); return; }
+        if (isNaN(montantTotal) || montantTotal <= 0) { alert("Montant invalide."); return; }
     } else {
         const gainMin = parseFloat(document.getElementById("gain-min").value);
         const gainMax = parseFloat(document.getElementById("gain-max").value);
-        if (isNaN(gainMin) || isNaN(gainMax) || gainMin <= 0 || gainMax < gainMin) { alert("Gains min/max invalides."); return; }
+        if (isNaN(gainMin) || isNaN(gainMax) || gainMin <= 0 || gainMax < gainMin) { alert("Gains invalides."); return; }
         const gainCible = (gainMin + gainMax) / 2;
-        montantTotal = gainCible * marge; 
+        montantTotal = gainCible * marge;
     }
 
     let mise1 = (montantTotal * c2) / (c1 + c2);
     let mise2 = (montantTotal * c1) / (c1 + c2);
 
-    if (variation > 0) {
-        const bruit1 = 1 + (Math.random() * 2 - 1) * variation;
-        const bruit2 = 1 + (Math.random() * 2 - 1) * variation;
-        mise1 *= bruit1;
-        mise2 *= bruit2;
+    if (currentVariation > 0) {
+        mise1 *= (1 + (Math.random() * 2 - 1) * currentVariation);
+        mise2 *= (1 + (Math.random() * 2 - 1) * currentVariation);
     }
 
     mise1 = Math.round(mise1 * 100) / 100;
@@ -92,11 +95,10 @@ function calculer() {
 
     resDiv.style.display = "block";
     resContent.innerHTML = `
-        <div class="res-line"><span>Mise totale</span><span>${totalMise.toFixed(2)} FCFA</span></div>
-        <div class="res-line"><span>Mise sur ${selected[0].name} (Cote ${c1})</span><span class="highlight">${mise1.toFixed(2)} FCFA</span></div>
-        <div class="res-line"><span>Mise sur ${selected[1].name} (Cote ${c2})</span><span class="highlight">${mise2.toFixed(2)} FCFA</span></div>
-        <div class="res-line"><span>Gain si ${selected[0].name}</span><span class="highlight">+${gain1.toFixed(2)} FCFA</span></div>
-        <div class="res-line"><span>Gain si ${selected[1].name}</span><span class="highlight">+${gain2.toFixed(2)} FCFA</span></div>
-        <div class="res-line"><span>Marge de sécurité</span><span>${((1 - marge) * 100).toFixed(2)}%</span></div>
+        <div class="res-line"><span>Total misé</span><span>${totalMise.toFixed(2)} F</span></div>
+        <div class="res-line"><span>Mise sur ${selected[0].name} (${c1})</span><span class="highlight">${mise1.toFixed(2)} F</span></div>
+        <div class="res-line"><span>Mise sur ${selected[1].name} (${c2})</span><span class="highlight">${mise2.toFixed(2)} F</span></div>
+        <div class="res-line"><span>Gain net si ${selected[0].name}</span><span class="highlight">+${gain1.toFixed(2)} F</span></div>
+        <div class="res-line"><span>Gain net si ${selected[1].name}</span><span class="highlight">+${gain2.toFixed(2)} F</span></div>
     `;
 }

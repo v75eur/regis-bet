@@ -2,8 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Regis-Bet | Calculateur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Regis-Bet</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
@@ -13,8 +13,8 @@
         <div class="login-box">
             <h1 class="logo">Regis-Bet</h1>
             <p class="subtitle">Accès sécurisé</p>
-            <input type="password" id="password-input" placeholder="Mot de passe">
-            <button onclick="checkPassword()">Déverrouiller</button>
+            <input type="password" id="password-input" placeholder="Mot de passe" onkeypress="if(event.key==='Enter') checkPassword()">
+            <button onclick="checkPassword()">Entrer</button>
             <p id="error-msg"></p>
         </div>
     </div>
@@ -22,53 +22,68 @@
     <div id="main-screen" class="screen">
         <header>
             <h1 class="logo">Regis-Bet</h1>
-            <p class="subtitle">Calculateur de répartition sans risque</p>
+            <p class="subtitle">Calculateur de répartition</p>
         </header>
 
         <div class="card">
-            <h2>1. Choisissez 2 issues</h2>
-            <div class="grid-3">
-                <label class="check-card"><input type="checkbox" id="chk-forte" onchange="limitCheckboxes('chk-forte')"><span>Victoire Forte</span></label>
-                <label class="check-card"><input type="checkbox" id="chk-faible" onchange="limitCheckboxes('chk-faible')"><span>Victoire Faible</span></label>
-                <label class="check-card"><input type="checkbox" id="chk-nul" onchange="limitCheckboxes('chk-nul')"><span>Match Nul</span></label>
+            <h2>Issues (Cochez-en 2)</h2>
+            <div class="issues-grid">
+                <label class="issue-box">
+                    <input type="checkbox" id="chk-forte" onchange="limitCheckboxes('chk-forte')">
+                    <span class="issue-name">Victoire Forte</span>
+                    <input type="number" step="0.01" id="cote-forte" placeholder="Cote" class="inline-cote">
+                </label>
+                <label class="issue-box">
+                    <input type="checkbox" id="chk-faible" onchange="limitCheckboxes('chk-faible')">
+                    <span class="issue-name">Victoire Faible</span>
+                    <input type="number" step="0.01" id="cote-faible" placeholder="Cote" class="inline-cote">
+                </label>
+                <label class="issue-box">
+                    <input type="checkbox" id="chk-nul" onchange="limitCheckboxes('chk-nul')">
+                    <span class="issue-name">Match Nul</span>
+                    <input type="number" step="0.01" id="cote-nul" placeholder="Cote" class="inline-cote">
+                </label>
             </div>
         </div>
 
         <div class="card">
-            <h2>2. Entrez les cotes</h2>
-            <div class="input-group"><label>Équipe Forte</label><input type="number" step="0.01" id="cote-forte" placeholder="Ex: 1.50"></div>
-            <div class="input-group"><label>Équipe Faible</label><input type="number" step="0.01" id="cote-faible" placeholder="Ex: 5.00"></div>
-            <div class="input-group"><label>Match Nul</label><input type="number" step="0.01" id="cote-nul" placeholder="Ex: 3.50"></div>
+            <div class="mode-switch">
+                <button id="btn-mode-total" class="active" onclick="setMode('total')">Montant Total</button>
+                <button id="btn-mode-gain" onclick="setMode('gain')">Gain Cible</button>
+            </div>
+
+            <div id="input-total" class="input-container">
+                <label>Montant à miser (FCFA)</label>
+                <input type="number" step="0.01" id="montant-total" value="1000">
+            </div>
+
+            <div id="input-gain" class="input-container" style="display:none;">
+                <div class="gain-inputs">
+                    <div>
+                        <label>Gain Min</label>
+                        <input type="number" step="0.01" id="gain-min" value="100">
+                    </div>
+                    <div>
+                        <label>Gain Max</label>
+                        <input type="number" step="0.01" id="gain-max" value="150">
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="card">
-            <h2>3. Mode de calcul</h2>
-            <div class="radio-group">
-                <label class="radio-card"><input type="radio" name="mode" value="total" checked onchange="toggleInputs()"><span>Je fixe le montant total</span></label>
-                <label class="radio-card"><input type="radio" name="mode" value="gain" onchange="toggleInputs()"><span>Je fixe le gain min/max</span></label>
-            </div>
-            <div id="input-total" class="mt-20">
-                <div class="input-group"><label>Montant total à miser (FCFA)</label><input type="number" step="0.01" id="montant-total" value="1000"></div>
-            </div>
-            <div id="input-gain" class="mt-20" style="display:none;">
-                <div class="input-group"><label>Gain Minimum (FCFA)</label><input type="number" step="0.01" id="gain-min" value="100"></div>
-                <div class="input-group"><label>Gain Maximum (FCFA)</label><input type="number" step="0.01" id="gain-max" value="150"></div>
+            <label>Variation Anti-Bot</label>
+            <div class="variation-switch">
+                <button onclick="setVariation(0, this)" class="active">0%</button>
+                <button onclick="setVariation(0.03, this)">±3%</button>
+                <button onclick="setVariation(0.05, this)">±5%</button>
             </div>
         </div>
 
-        <div class="card">
-            <h2>4. Variation (Anti-Bot)</h2>
-            <div class="grid-3">
-                <label class="radio-card"><input type="radio" name="variation" value="0" checked><span>Aucune</span></label>
-                <label class="radio-card"><input type="radio" name="variation" value="0.03"><span>± 3%</span></label>
-                <label class="radio-card"><input type="radio" name="variation" value="0.05"><span>± 5%</span></label>
-            </div>
-        </div>
+        <button class="btn-calc" onclick="calculer()">Calculer</button>
 
-        <button class="btn-main" onclick="calculer()">Calculer la répartition</button>
-
-        <div id="resultats" class="card result-card" style="display: none;">
-            <h2>Répartition Idéale</h2>
+        <div id="resultats" class="result-box">
+            <h2>Répartition</h2>
             <div id="resultat-contenu"></div>
         </div>
     </div>
