@@ -1,0 +1,38 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background-color: #0d1117; color: #c9d1d9; display: flex; justify-content: center; min-height: 100vh; }
+.screen { width: 100%; max-width: 500px; padding: 20px; display: none; }
+.screen.active { display: block; }
+header { text-align: center; margin-bottom: 30px; margin-top: 20px; }
+.logo { font-size: 2.2rem; font-weight: 800; background: linear-gradient(90deg, #58a6ff, #3fb950); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; }
+.subtitle { color: #8b949e; font-size: 0.9rem; margin-top: 5px; }
+#login-screen { display: flex; align-items: center; justify-content: center; }
+.login-box { background: #161b22; padding: 40px 30px; border-radius: 16px; border: 1px solid #30363d; text-align: center; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.login-box .logo { font-size: 2rem; margin-bottom: 5px; }
+.login-box .subtitle { margin-bottom: 25px; }
+.login-box input { width: 100%; padding: 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: white; font-size: 1rem; margin-bottom: 15px; outline: none; }
+.login-box input:focus { border-color: #58a6ff; }
+.login-box button { width: 100%; padding: 14px; background: #238636; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+.login-box button:hover { background: #2ea043; }
+#error-msg { color: #f85149; margin-top: 15px; font-size: 0.9rem; }
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.card h2 { font-size: 1.1rem; color: #f0f6fc; margin-bottom: 15px; font-weight: 600; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.check-card, .radio-card { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+.check-card input, .radio-card input { accent-color: #3fb950; transform: scale(1.2); }
+.check-card:has(input:checked), .radio-card:has(input:checked) { border-color: #3fb950; background: rgba(63, 185, 80, 0.1); }
+.radio-group { display: flex; flex-direction: column; gap: 10px; }
+.radio-group .radio-card { flex-direction: row; justify-content: flex-start; text-align: left; }
+.input-group { margin-bottom: 15px; }
+.input-group label { display: block; font-size: 0.85rem; color: #8b949e; margin-bottom: 5px; }
+.input-group input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: white; font-size: 1rem; outline: none; }
+.input-group input:focus { border-color: #58a6ff; }
+.mt-20 { margin-top: 20px; }
+.btn-main { width: 100%; padding: 16px; background: #238636; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-bottom: 20px; transition: background 0.2s; }
+.btn-main:hover { background: #2ea043; }
+.result-card { border-color: #3fb950; background: linear-gradient(180deg, rgba(63, 185, 80, 0.05), transparent); }
+.res-line { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #30363d; }
+.res-line:last-child { border-bottom: none; }
+.res-line span:first-child { color: #8b949e; }
+.res-line span:last-child { font-weight: 600; color: #f0f6fc; }
+.highlight { color: #3fb950 !important; }
+.danger { color: #f85149 !important; }

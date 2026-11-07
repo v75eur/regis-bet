@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regis-Bet | Calculateur</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="login-screen" class="screen active">
+        <div class="login-box">
+            <h1 class="logo">Regis-Bet</h1>
+            <p class="subtitle">Accès sécurisé</p>
+            <input type="password" id="password-input" placeholder="Mot de passe">
+            <button onclick="checkPassword()">Déverrouiller</button>
+            <p id="error-msg"></p>
+        </div>
+    </div>
+
+    <div id="main-screen" class="screen">
+        <header>
+            <h1 class="logo">Regis-Bet</h1>
+            <p class="subtitle">Calculateur de répartition sans risque</p>
+        </header>
+
+        <div class="card">
+            <h2>1. Choisissez 2 issues</h2>
+            <div class="grid-3">
+                <label class="check-card"><input type="checkbox" id="chk-forte" onchange="limitCheckboxes('chk-forte')"><span>Victoire Forte</span></label>
+                <label class="check-card"><input type="checkbox" id="chk-faible" onchange="limitCheckboxes('chk-faible')"><span>Victoire Faible</span></label>
+                <label class="check-card"><input type="checkbox" id="chk-nul" onchange="limitCheckboxes('chk-nul')"><span>Match Nul</span></label>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>2. Entrez les cotes</h2>
+            <div class="input-group"><label>Équipe Forte</label><input type="number" step="0.01" id="cote-forte" placeholder="Ex: 1.50"></div>
+            <div class="input-group"><label>Équipe Faible</label><input type="number" step="0.01" id="cote-faible" placeholder="Ex: 5.00"></div>
+            <div class="input-group"><label>Match Nul</label><input type="number" step="0.01" id="cote-nul" placeholder="Ex: 3.50"></div>
+        </div>
+
+        <div class="card">
+            <h2>3. Mode de calcul</h2>
+            <div class="radio-group">
+                <label class="radio-card"><input type="radio" name="mode" value="total" checked onchange="toggleInputs()"><span>Je fixe le montant total</span></label>
+                <label class="radio-card"><input type="radio" name="mode" value="gain" onchange="toggleInputs()"><span>Je fixe le gain min/max</span></label>
+            </div>
+            <div id="input-total" class="mt-20">
+                <div class="input-group"><label>Montant total à miser (FCFA)</label><input type="number" step="0.01" id="montant-total" value="1000"></div>
+            </div>
+            <div id="input-gain" class="mt-20" style="display:none;">
+                <div class="input-group"><label>Gain Minimum (FCFA)</label><input type="number" step="0.01" id="gain-min" value="100"></div>
+                <div class="input-group"><label>Gain Maximum (FCFA)</label><input type="number" step="0.01" id="gain-max" value="150"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>4. Variation (Anti-Bot)</h2>
+            <div class="grid-3">
+                <label class="radio-card"><input type="radio" name="variation" value="0" checked><span>Aucune</span></label>
+                <label class="radio-card"><input type="radio" name="variation" value="0.03"><span>± 3%</span></label>
+                <label class="radio-card"><input type="radio" name="variation" value="0.05"><span>± 5%</span></label>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="calculer()">Calculer la répartition</button>
+
+        <div id="resultats" class="card result-card" style="display: none;">
+            <h2>Répartition Idéale</h2>
+            <div id="resultat-contenu"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
