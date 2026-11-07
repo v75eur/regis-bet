@@ -16,7 +16,13 @@ header { text-align: center; margin-bottom: 30px; margin-top: 20px; }
 #error-msg { color: #f85149; margin-top: 15px; font-size: 0.9rem; }
 .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
 .card h2 { font-size: 1.1rem; color: #f0f6fc; margin-bottom: 15px; font-weight: 600; }
+
+/* Grille adaptative pour mobile */
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+@media (max-width: 400px) {
+    .grid-3 { grid-template-columns: 1fr; }
+}
+
 .check-card, .radio-card { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
 .check-card input, .radio-card input { accent-color: #3fb950; transform: scale(1.2); }
 .check-card:has(input:checked), .radio-card:has(input:checked) { border-color: #3fb950; background: rgba(63, 185, 80, 0.1); }
@@ -29,10 +35,13 @@ header { text-align: center; margin-bottom: 30px; margin-top: 20px; }
 .mt-20 { margin-top: 20px; }
 .btn-main { width: 100%; padding: 16px; background: #238636; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-bottom: 20px; transition: background 0.2s; }
 .btn-main:hover { background: #2ea043; }
+
+/* Le résultat est bien caché au départ */
+#resultats { display: none; margin-top: 20px; }
 .result-card { border-color: #3fb950; background: linear-gradient(180deg, rgba(63, 185, 80, 0.05), transparent); }
-.res-line { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #30363d; }
+.res-line { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #30363d; flex-wrap: wrap; gap: 5px; }
 .res-line:last-child { border-bottom: none; }
-.res-line span:first-child { color: #8b949e; }
+.res-line span:first-child { color: #8b949e; font-size: 0.9rem; }
 .res-line span:last-child { font-weight: 600; color: #f0f6fc; }
 .highlight { color: #3fb950 !important; }
 .danger { color: #f85149 !important; }

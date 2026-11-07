@@ -46,9 +46,12 @@ function calculer() {
     const c2 = selected[1].cote;
     const marge = (1 / c1) + (1 / c2);
 
+    const resDiv = document.getElementById("resultats");
+    const resContent = document.getElementById("resultat-contenu");
+
     if (marge >= 1) {
-        document.getElementById("resultats").style.display = "block";
-        document.getElementById("resultat-contenu").innerHTML = `
+        resDiv.style.display = "block";
+        resContent.innerHTML = `
             <p class="danger"><strong>Impossible de garantir un gain !</strong></p>
             <p>La somme des probabilités (${marge.toFixed(4)}) est supérieure ou égale à 1.</p>
             <p>Les cotes ne permettent pas une répartition gagnante.</p>
@@ -58,7 +61,7 @@ function calculer() {
 
     const variation = parseFloat(document.querySelector('input[name="variation"]:checked').value);
     const mode = document.querySelector('input[name="mode"]:checked').value;
-    let montantTotal, gainCible;
+    let montantTotal;
 
     if (mode === "total") {
         montantTotal = parseFloat(document.getElementById("montant-total").value);
@@ -67,7 +70,7 @@ function calculer() {
         const gainMin = parseFloat(document.getElementById("gain-min").value);
         const gainMax = parseFloat(document.getElementById("gain-max").value);
         if (isNaN(gainMin) || isNaN(gainMax) || gainMin <= 0 || gainMax < gainMin) { alert("Gains min/max invalides."); return; }
-        gainCible = (gainMin + gainMax) / 2;
+        const gainCible = (gainMin + gainMax) / 2;
         montantTotal = gainCible * marge; 
     }
 
@@ -87,8 +90,8 @@ function calculer() {
     const gain1 = (mise1 * c1) - totalMise;
     const gain2 = (mise2 * c2) - totalMise;
 
-    document.getElementById("resultats").style.display = "block";
-    document.getElementById("resultat-contenu").innerHTML = `
+    resDiv.style.display = "block";
+    resContent.innerHTML = `
         <div class="res-line"><span>Mise totale</span><span>${totalMise.toFixed(2)} FCFA</span></div>
         <div class="res-line"><span>Mise sur ${selected[0].name} (Cote ${c1})</span><span class="highlight">${mise1.toFixed(2)} FCFA</span></div>
         <div class="res-line"><span>Mise sur ${selected[1].name} (Cote ${c2})</span><span class="highlight">${mise2.toFixed(2)} FCFA</span></div>
