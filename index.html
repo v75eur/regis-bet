@@ -7,11 +7,10 @@
     <title>Regis-Bet</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 
-<!-- LOGIN -->
 <section id="login-screen" class="screen active">
     <div class="login-card">
         <div class="brand">Regis<span>-Bet</span></div>
@@ -23,43 +22,46 @@
     </div>
 </section>
 
-<!-- APP -->
 <section id="main-screen" class="screen">
     <header class="topbar">
         <div class="brand small">Regis<span>-Bet</span></div>
-        <div class="muted">Répartition 2 issues</div>
+        <div class="muted">Répartition</div>
     </header>
 
     <main class="container">
 
         <div class="card">
-            <div class="card-title"><span class="step">1</span>Équipes</div>
-            <div class="grid-2">
-                <div>
-                    <label class="label">Favorite</label>
-                    <input type="text" id="team-fav" placeholder="Real Madrid">
+            <div class="card-title"><span class="step">1</span>Équipes et codes</div>
+            <div class="issues">
+                <div class="issue">
+                    <input type="text" id="team-fav" placeholder="Équipe favorite" style="flex:1">
+                    <input type="text" inputmode="decimal" id="cote-fav" placeholder="Code">
                 </div>
-                <div>
-                    <label class="label">Adversaire</label>
-                    <input type="text" id="team-out" placeholder="Barcelone">
+                <div class="issue">
+                    <div class="issue-top">Match nul</div>
+                    <input type="text" inputmode="decimal" id="cote-nul" placeholder="Code">
+                </div>
+                <div class="issue">
+                    <input type="text" id="team-out" placeholder="Équipe faible" style="flex:1">
+                    <input type="text" inputmode="decimal" id="cote-out" placeholder="Code">
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title"><span class="step">2</span>Issues <small>(coche les 2 que tu joues)</small></div>
+            <div class="card-title"><span class="step">2</span>Issues <small>(choisis-en 2)</small></div>
             <div class="issues">
-                <div class="issue" id="issue-forte" onclick="toggleIssue('forte')">
-                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Favori gagne</span></div>
-                    <input type="text" inputmode="decimal" id="cote-forte" placeholder="Cote" onclick="event.stopPropagation()">
+                <div class="issue" id="issue-fn" onclick="toggleIssue('fn')">
+                    <div class="issue-top"><span class="tick"></span><span id="lbl-fn">Favori ou nul</span></div>
+                    <div class="issue-code" id="d-fn">-</div>
                 </div>
-                <div class="issue" id="issue-faible" onclick="toggleIssue('faible')">
-                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Adversaire gagne</span></div>
-                    <input type="text" inputmode="decimal" id="cote-faible" placeholder="Cote" onclick="event.stopPropagation()">
+                <div class="issue" id="issue-fo" onclick="toggleIssue('fo')">
+                    <div class="issue-top"><span class="tick"></span><span id="lbl-fo">Favori ou faible</span></div>
+                    <div class="issue-code" id="d-fo">-</div>
                 </div>
-                <div class="issue" id="issue-nul" onclick="toggleIssue('nul')">
-                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Match nul</span></div>
-                    <input type="text" inputmode="decimal" id="cote-nul" placeholder="Cote" onclick="event.stopPropagation()">
+                <div class="issue" id="issue-no" onclick="toggleIssue('no')">
+                    <div class="issue-top"><span class="tick"></span><span id="lbl-no">Nul ou faible</span></div>
+                    <div class="issue-code" id="d-no">-</div>
                 </div>
             </div>
         </div>
@@ -70,12 +72,10 @@
                 <button id="btn-mode-total" class="seg active" onclick="setMode('total')">Montant total</button>
                 <button id="btn-mode-gain" class="seg" onclick="setMode('gain')">Gain cible</button>
             </div>
-
             <div id="input-total">
                 <label class="label">Montant total à miser (FCFA)</label>
                 <input type="text" inputmode="decimal" id="montant-total" value="1000">
             </div>
-
             <div id="input-gain" class="hidden">
                 <div class="grid-2">
                     <div>
@@ -111,6 +111,6 @@
     </div>
 </section>
 
-<script src="script.js?v=12"></script>
+<script src="script.js?v=14"></script>
 </body>
 </html>
