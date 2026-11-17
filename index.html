@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f4f6fb">
     <title>Regis-Bet</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=17">
+    <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
 <section id="login-screen" class="screen active">
@@ -28,32 +28,32 @@
     <main class="container">
 
         <div class="card">
-            <div class="card-title"><span class="step">1</span>Équipes</div>
-            <div class="grid-2">
-                <div><label class="label">Équipe favorite</label><input type="text" id="team-fav" placeholder="Manchester City"></div>
-                <div><label class="label">Équipe faible</label><input type="text" id="team-out" placeholder="Fulham"></div>
+            <div class="card-title"><span class="step">1</span>Équipes et cotes</div>
+            <label class="label">Équipe favorite (nom et cote)</label>
+            <div class="grid-2" style="grid-template-columns:2fr 1fr;margin-bottom:12px">
+                <input type="text" id="team-fav" placeholder="Manchester City">
+                <input type="text" inputmode="decimal" id="cote-fav" placeholder="Cote">
+            </div>
+            <label class="label">Match nul (cote)</label>
+            <div style="margin-bottom:12px"><input type="text" inputmode="decimal" id="cote-nul" placeholder="Cote"></div>
+            <label class="label">Équipe faible (nom et cote)</label>
+            <div class="grid-2" style="grid-template-columns:2fr 1fr">
+                <input type="text" id="team-out" placeholder="Fulham">
+                <input type="text" inputmode="decimal" id="cote-out" placeholder="Cote">
             </div>
         </div>
 
         <div class="card">
             <div class="card-title"><span class="step">2</span>Issue <small>(choisis-en 1)</small></div>
             <div class="issues">
-                <div class="issue" id="issue-fn" onclick="choisir('fn')"><div class="issue-top"><span class="tick"></span><span id="lbl-fn">Favori ou nul</span></div></div>
-                <div class="issue" id="issue-fo" onclick="choisir('fo')"><div class="issue-top"><span class="tick"></span><span id="lbl-fo">Favori ou faible</span></div></div>
-                <div class="issue" id="issue-no" onclick="choisir('no')"><div class="issue-top"><span class="tick"></span><span id="lbl-no">Nul ou faible</span></div></div>
+                <div class="issue" id="issue-fn" onclick="choisir('fn')"><div class="issue-top"><span class="tick"></span><span id="lbl-fn">Favori ou nul</span></div><span class="issue-code" id="d-fn">-</span></div>
+                <div class="issue" id="issue-fo" onclick="choisir('fo')"><div class="issue-top"><span class="tick"></span><span id="lbl-fo">Favori ou faible</span></div><span class="issue-code" id="d-fo">-</span></div>
+                <div class="issue" id="issue-no" onclick="choisir('no')"><div class="issue-top"><span class="tick"></span><span id="lbl-no">Nul ou faible</span></div><span class="issue-code" id="d-no">-</span></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title"><span class="step">3</span>Codes</div>
-            <div class="issues">
-                <div class="issue"><div class="issue-top" id="lbl-c1">Issue choisie</div><input type="text" inputmode="decimal" id="code-1" placeholder="Code"></div>
-                <div class="issue"><div class="issue-top" id="lbl-c2">Résultat restant</div><input type="text" inputmode="decimal" id="code-2" placeholder="Code"></div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-title"><span class="step">4</span>Mise</div>
+            <div class="card-title"><span class="step">3</span>Mise</div>
             <div class="segmented">
                 <button id="btn-mode-total" class="seg active" onclick="setMode('total')">Montant total</button>
                 <button id="btn-mode-gain" class="seg" onclick="setMode('gain')">Gain cible</button>
@@ -71,7 +71,7 @@
         </div>
 
         <div class="card">
-            <div class="card-title"><span class="step">5</span>Variation anti-bot</div>
+            <div class="card-title"><span class="step">4</span>Variation anti-bot</div>
             <div class="chips" id="variation-chips">
                 <button class="chip active" onclick="setVariation(0, this)">0%</button>
                 <button class="chip" onclick="setVariation(0.01, this)">±1%</button>
@@ -87,6 +87,6 @@
     </main>
     <div class="bottom-bar"><button class="btn primary big" onclick="calculer()">Calculer</button></div>
 </section>
-<script src="script.js?v=17"></script>
+<script src="script.js?v=20"></script>
 </body>
 </html>
