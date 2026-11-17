@@ -7,7 +7,7 @@
     <title>Regis-Bet</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=9">
+    <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 
@@ -50,15 +50,15 @@
             <div class="card-title"><span class="step">2</span>Issues <small>(choisis-en 2)</small></div>
             <div class="issues">
                 <div class="issue" id="issue-forte" onclick="toggleIssue('forte')">
-                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Victoire Forte</span></div>
+                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Favori ou Nul</span></div>
                     <input type="text" inputmode="decimal" id="cote-forte" placeholder="Cote" onclick="event.stopPropagation()">
                 </div>
                 <div class="issue" id="issue-faible" onclick="toggleIssue('faible')">
-                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Victoire Faible</span></div>
+                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Nul ou Adversaire</span></div>
                     <input type="text" inputmode="decimal" id="cote-faible" placeholder="Cote" onclick="event.stopPropagation()">
                 </div>
                 <div class="issue" id="issue-nul" onclick="toggleIssue('nul')">
-                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Match Nul</span></div>
+                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Favori ou Adversaire</span></div>
                     <input type="text" inputmode="decimal" id="cote-nul" placeholder="Cote" onclick="event.stopPropagation()">
                 </div>
             </div>
@@ -111,6 +111,6 @@
     </div>
 </section>
 
-<script src="script.js?v=9"></script>
+<script src="script.js?v=10"></script>
 </body>
 </html>

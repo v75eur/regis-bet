@@ -61,9 +61,9 @@ function calculer() {
     const teamFav = $("team-fav").value.trim() || "Favorite";
     const teamOut = $("team-out").value.trim() || "Adversaire";
     const defs = {
-        forte:  { name: "Victoire Forte",  team: teamFav },
-        faible: { name: "Victoire Faible", team: teamOut },
-        nul:    { name: "Match Nul",       team: "Nul" }
+        forte:  { name: "Favori ou Nul",  team: teamFav },
+        faible: { name: "Nul ou Adversaire", team: teamOut },
+        nul:    { name: "Favori ou Adversaire",       team: "Nul" }
     };
 
     if (selection.length !== 2) return echec("choisis exactement 2 issues.");
