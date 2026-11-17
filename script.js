@@ -1,8 +1,9 @@
 const SECRET = "reg@@s";
 let currentMode = "total";
 let currentVariation = 0;
+let dernierRecapTexte = "";
 
-/* ---------- UTILITAIRES ---------- */
+/* ================= UTILITAIRES ================= */
 function formatFCFA(n) {
     if (isNaN(n)) return "0 F";
     return n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " F";
@@ -14,7 +15,7 @@ function rnd(min, max) {
     return Math.random() * (max - min) + min;
 }
 
-/* ---------- LOGIN ---------- */
+/* ================= LOGIN ================= */
 function checkPassword() {
     const pwd = document.getElementById("password-input").value;
     if (pwd === SECRET) {
@@ -25,7 +26,7 @@ function checkPassword() {
     }
 }
 
-/* ---------- SELECTION ISSUES ---------- */
+/* ================= SELECTION ISSUES ================= */
 function limitCheckboxes(selectedId) {
     const chks = ['chk-forte', 'chk-faible', 'chk-nul'];
     const count = chks.filter(id => document.getElementById(id).checked).length;
@@ -35,7 +36,7 @@ function limitCheckboxes(selectedId) {
     }
 }
 
-/* ---------- MODE ---------- */
+/* ================= MODE ================= */
 function setMode(mode) {
     currentMode = mode;
     document.getElementById("btn-mode-total").classList.toggle("active", mode === "total");
@@ -44,27 +45,30 @@ function setMode(mode) {
     document.getElementById("input-gain").style.display = (mode === "gain") ? "block" : "none";
 }
 
-/* ---------- VARIATION ---------- */
+/* ================= VARIATION ================= */
 function setVariation(val, btn) {
     currentVariation = val;
     document.querySelectorAll(".variation-switch button").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 }
 
-/* ---------- CALCUL PRINCIPAL ---------- */
+/* ================= CALCUL PRINCIPAL ================= */
 function calculer() {
-    const chkForte = document.getElementById("chk-forte").checked;
-    const chkFaible = document.getElementById("chk-faible").checked;
-    const chkNul = document.getElementById("chk-nul").checked;
+    const teamFav = document.getElementById("team-fav").value.trim() || "Equipe Favorite";
+    const teamOut = document.getElementById("team-out").value.trim() || "Equipe Perdante";
 
-    const coteForte = parseFloat(document.getElementById("cote-forte").value);
+    const chkForte  = document.getElementById("chk-forte").checked;
+    const chkFaible = document.getElementById("chk-faible").checked;
+    const chkNul    = document.getElementById("chk-nul").checked;
+
+    const coteForte  = parseFloat(document.getElementById("cote-forte").value);
     const coteFaible = parseFloat(document.getElementById("cote-faible").value);
-    const coteNul = parseFloat(document.getElementById("cote-nul").value);
+    const coteNul    = parseFloat(document.getElementById("cote-nul").value);
 
     const selected = [];
-    if (chkForte) selected.push({ name: "Victoire Forte", cote: coteForte });
-    if (chkFaible) selected.push({ name: "Victoire Faible", cote: coteFaible });
-    if (chkNul) selected.push({ name: "Match Nul", cote: coteNul });
+    if (chkForte)  selected.push({ name: "Victoire Forte",  cote: coteForte,  team: teamFav });
+    if (chkFaible) selected.push({ name: "Victoire Faible", cote: coteFaible, team: teamOut });
+    if (chkNul)    selected.push({ name: "Match Nul",       cote: coteNul,    team: "Match Nul" });
 
     const resDiv = document.getElementById("resultats");
     const resContent = document.getElementById("resultat-contenu");
@@ -80,6 +84,7 @@ function calculer() {
     if (marge >= 1) {
         resDiv.style.display = "block";
         resContent.innerHTML = '<p class="danger"><strong>Impossible de garantir un gain !</strong><br>Marge bookmaker trop elevee (' + formatPct(marge) + '). Il faut une marge < 100%.</p>';
+        dernierRecapTexte = "Calcul impossible : marge trop elevee (" + formatPct(marge) + ")";
         return;
     }
 
@@ -99,13 +104,12 @@ function calculer() {
         montantTotal = gainCibleMoyen / (1 - marge);
     }
 
-    /* --- Mises theoriques (avant variation) --- */
+    /* --- Mises theoriques --- */
     let mise1Base = (montantTotal * c2) / (c1 + c2);
     let mise2Base = (montantTotal * c1) / (c1 + c2);
 
     /* --- Variation anti-bot SAFE --- */
-    let mise1 = mise1Base;
-    let mise2 = mise2Base;
+    let mise1 = mise1Base, mise2 = mise2Base;
     let variation1 = 0, variation2 = 0;
 
     if (currentVariation > 0) {
@@ -127,11 +131,9 @@ function calculer() {
         }
         if (!ok) {
             const v = rnd(-currentVariation, currentVariation);
-            const factor = 1 + v;
-            mise1 = mise1Base * factor;
-            mise2 = mise2Base * factor;
-            variation1 = v;
-            variation2 = v;
+            mise1 = mise1Base * (1 + v);
+            mise2 = mise2Base * (1 + v);
+            variation1 = v; variation2 = v;
         }
     }
 
@@ -147,28 +149,103 @@ function calculer() {
     const gainMinReel = Math.min(gainNet1, gainNet2);
     const gainMaxReel = Math.max(gainNet1, gainNet2);
 
-    /* --- Affichage --- */
-    resDiv.style.display = "block";
-    resContent.innerHTML = [
-        '<div class="section-title">Mises</div>',
-        '<div class="res-line"><span>Mise ' + selected[0].name + ' (cote ' + c1 + ')</span><span class="highlight">' + formatFCFA(mise1) + '</span></div>',
-        '<div class="res-line"><span>Mise ' + selected[1].name + ' (cote ' + c2 + ')</span><span class="highlight">' + formatFCFA(mise2) + '</span></div>',
+    /* --- Affichage HTML --- */
+    const html = [
+        // equipes
+        '<div class="section-title">Equipes</div>',
+        '<div class="res-line"><span>Equipe Favorite</span><span>' + teamFav + '</span></div>',
+        '<div class="res-line"><span>Equipe Perdante</span><span>' + teamOut + '</span></div>',
+
+        // mises
+        '<div class="section-title">Mises a placer</div>',
+        '<div class="res-line"><span>Mise ' + selected[0].name + ' (' + selected[0].team + ') - cote ' + c1 + '</span><span class="highlight">' + formatFCFA(mise1) + '</span></div>',
+        '<div class="res-line"><span>Mise ' + selected[1].name + ' (' + selected[1].team + ') - cote ' + c2 + '</span><span class="highlight">' + formatFCFA(mise2) + '</span></div>',
         '<div class="res-line total"><span>Total mise</span><span>' + formatFCFA(totalMise) + '</span></div>',
 
-        '<div class="section-title">Variation appliquee</div>',
+        // variation
+        '<div class="section-title">Variation Anti-Bot appliquee</div>',
         '<div class="res-line"><span>Sur ' + selected[0].name + '</span><span class="' + (variation1 >= 0 ? 'up' : 'down') + '">' + (variation1 >= 0 ? '+' : '') + (variation1*100).toFixed(2) + '%</span></div>',
         '<div class="res-line"><span>Sur ' + selected[1].name + '</span><span class="' + (variation2 >= 0 ? 'up' : 'down') + '">' + (variation2 >= 0 ? '+' : '') + (variation2*100).toFixed(2) + '%</span></div>',
 
+        // retour / gain
         '<div class="section-title">Gains si l issue passe</div>',
-        '<div class="res-line"><span>Retour si ' + selected[0].name + '</span><span>' + formatFCFA(retour1) + '</span></div>',
-        '<div class="res-line"><span>Gain net si ' + selected[0].name + '</span><span class="highlight">+' + formatFCFA(gainNet1) + '</span></div>',
-        '<div class="res-line"><span>Retour si ' + selected[1].name + '</span><span>' + formatFCFA(retour2) + '</span></div>',
-        '<div class="res-line"><span>Gain net si ' + selected[1].name + '</span><span class="highlight">+' + formatFCFA(gainNet2) + '</span></div>',
+        '<div class="res-line"><span>Retour si ' + selected[0].name + ' (' + selected[0].team + ')</span><span>' + formatFCFA(retour1) + '</span></div>',
+        '<div class="res-line"><span>Gain net si ' + selected[0].name + ' (' + selected[0].team + ')</span><span class="highlight">+' + formatFCFA(gainNet1) + '</span></div>',
+        '<div class="res-line"><span>Retour si ' + selected[1].name + ' (' + selected[1].team + ')</span><span>' + formatFCFA(retour2) + '</span></div>',
+        '<div class="res-line"><span>Gain net si ' + selected[1].name + ' (' + selected[1].team + ')</span><span class="highlight">+' + formatFCFA(gainNet2) + '</span></div>',
 
+        // recap
         '<div class="section-title">Recapitulatif</div>',
         '<div class="res-line"><span>Marge bookmaker</span><span>' + formatPct(marge) + '</span></div>',
         '<div class="res-line"><span>Gain net garanti (min)</span><span class="highlight">+' + formatFCFA(gainMinReel) + '</span></div>',
         '<div class="res-line"><span>Gain net max</span><span class="highlight">+' + formatFCFA(gainMaxReel) + '</span></div>',
-        '<div class="res-line total"><span>Total gagne (si une issue passe)</span><span>' + formatFCFA(totalMise + gainMinReel) + ' -> ' + formatFCFA(totalMise + gainMaxReel) + '</span></div>'
+        '<div class="res-line total"><span>Total gagne (si une issue passe)</span><span>' + formatFCFA(totalMise + gainMinReel) + ' a ' + formatFCFA(totalMise + gainMaxReel) + '</span></div>'
     ].join('');
+
+    resContent.innerHTML = html;
+    resDiv.style.display = "block";
+
+    /* --- Recap TEXTE pour presse-papier --- */
+    const sep = "================================";
+    const lines = [
+        sep,
+        "   REGIS-BET - RECAPITULATIF",
+        sep,
+        "Equipe Favorite : " + teamFav,
+        "Equipe Perdante : " + teamOut,
+        "",
+        "-- MISES --",
+        selected[0].name + " (" + selected[0].team + ") | cote " + c1 + " | " + formatFCFA(mise1),
+        selected[1].name + " (" + selected[1].team + ") | cote " + c2 + " | " + formatFCFA(mise2),
+        "TOTAL MISE : " + formatFCFA(totalMise),
+        "",
+        "-- VARIATION --",
+        selected[0].name + " : " + (variation1 >= 0 ? '+' : '') + (variation1*100).toFixed(2) + "%",
+        selected[1].name + " : " + (variation2 >= 0 ? '+' : '') + (variation2*100).toFixed(2) + "%",
+        "",
+        "-- GAINS --",
+        "Si " + selected[0].name + " : retour " + formatFCFA(retour1) + " | gain net +" + formatFCFA(gainNet1),
+        "Si " + selected[1].name + " : retour " + formatFCFA(retour2) + " | gain net +" + formatFCFA(gainNet2),
+        "",
+        "-- RECAP --",
+        "Marge bookmaker : " + formatPct(marge),
+        "Gain garanti min : +" + formatFCFA(gainMinReel),
+        "Gain max : +" + formatFCFA(gainMaxReel),
+        "Total gagne : " + formatFCFA(totalMise + gainMinReel) + " a " + formatFCFA(totalMise + gainMaxReel),
+        sep
+    ];
+    dernierRecapTexte = lines.join('\n');
+}
+
+/* ================= COPIE PRESSE-PAPIER ================= */
+function copierRecap() {
+    if (!dernierRecapTexte) { alert("Calcule d'abord une repartition."); return; }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(dernierRecapTexte).then(() => {
+            flashCopie("Copie !");
+        }).catch(() => fallbackCopie());
+    } else {
+        fallbackCopie();
+    }
+}
+
+function fallbackCopie() {
+    const ta = document.createElement("textarea");
+    ta.value = dernierRecapTexte;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); flashCopie("Copie !"); }
+    catch (e) { alert("Copie impossible sur ce navigateur."); }
+    document.body.removeChild(ta);
+}
+
+function flashCopie(msg) {
+    const btn = document.getElementById("btn-copy");
+    const old = btn.textContent;
+    btn.textContent = msg;
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = old; btn.classList.remove("copied"); }, 1500);
 }

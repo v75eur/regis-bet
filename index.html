@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Regis-Bet</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=4">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- ECRAN LOGIN -->
+    <!-- ========== ECRAN LOGIN ========== -->
     <div id="login-screen" class="screen active">
         <div class="login-box">
             <h1 class="logo">Regis-Bet</h1>
@@ -21,16 +21,31 @@
         </div>
     </div>
 
-    <!-- ECRAN PRINCIPAL -->
+    <!-- ========== ECRAN PRINCIPAL ========== -->
     <div id="main-screen" class="screen">
         <header>
             <h1 class="logo">Regis-Bet</h1>
             <p class="subtitle">Calculateur de repartition</p>
         </header>
 
-        <!-- ISSUES -->
+        <!-- SECTION 1 : EQUIPES -->
         <div class="card">
-            <h2>Issues (Cochez-en 2)</h2>
+            <h2>1. Equipes</h2>
+            <div class="teams-grid">
+                <div>
+                    <label class="mini-label">Equipe Favorite</label>
+                    <input type="text" id="team-fav" placeholder="Ex: Real Madrid" class="text-input">
+                </div>
+                <div>
+                    <label class="mini-label">Equipe Perdante</label>
+                    <input type="text" id="team-out" placeholder="Ex: Barcelone" class="text-input">
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2 : ISSUES -->
+        <div class="card">
+            <h2>2. Issues (Cochez-en 2)</h2>
             <div class="issues-grid">
                 <label class="issue-box">
                     <input type="checkbox" id="chk-forte" onchange="limitCheckboxes('chk-forte')">
@@ -50,8 +65,9 @@
             </div>
         </div>
 
-        <!-- MODE -->
+        <!-- SECTION 3 : MODE -->
         <div class="card">
+            <h2>3. Mode de calcul</h2>
             <div class="mode-switch">
                 <button id="btn-mode-total" class="active" onclick="setMode('total')">Montant Total</button>
                 <button id="btn-mode-gain" onclick="setMode('gain')">Gain Cible</button>
@@ -76,25 +92,32 @@
             </div>
         </div>
 
-        <!-- VARIATION -->
+        <!-- SECTION 4 : VARIATION -->
         <div class="card">
-            <label>Variation Anti-Bot</label>
+            <h2>4. Variation Anti-Bot</h2>
             <div class="variation-switch">
                 <button onclick="setVariation(0, this)" class="active">0%</button>
-                <button onclick="setVariation(0.03, this)">+/- 3%</button>
-                <button onclick="setVariation(0.05, this)">+/- 5%</button>
+                <button onclick="setVariation(0.01, this)">&plusmn;1%</button>
+                <button onclick="setVariation(0.02, this)">&plusmn;2%</button>
+                <button onclick="setVariation(0.03, this)">&plusmn;3%</button>
+                <button onclick="setVariation(0.05, this)">&plusmn;5%</button>
+                <button onclick="setVariation(0.07, this)">&plusmn;7%</button>
+                <button onclick="setVariation(0.10, this)">&plusmn;10%</button>
             </div>
         </div>
 
         <button class="btn-calc" onclick="calculer()">Calculer</button>
 
-        <!-- RESULTATS -->
+        <!-- ========== RESULTATS ========== -->
         <div id="resultats" class="result-box">
-            <h2>Repartition</h2>
+            <div class="result-header">
+                <h2>Repartition</h2>
+                <button id="btn-copy" class="btn-copy" onclick="copierRecap()">Copier</button>
+            </div>
             <div id="resultat-contenu"></div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=4"></script>
 </body>
 </html>

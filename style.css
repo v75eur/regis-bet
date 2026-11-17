@@ -239,3 +239,46 @@ header { text-align: center; margin-bottom: 20px; margin-top: 10px; }
 .up { color: #16a34a !important; }
 .down { color: #dc2626 !important; }
 .danger { color: #dc2626 !important; text-align: center; line-height: 1.5; padding: 10px 0; }
+
+/* ===== AJOUTS V4 ===== */
+.teams-grid { display: flex; gap: 10px; }
+.teams-grid > div { flex: 1; }
+.mini-label { font-size: 0.75rem; color: #6b7280; margin-bottom: 4px; display: block; font-weight: 600; }
+.text-input {
+    width: 100%;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #111827;
+    font-size: 0.95rem;
+    font-weight: 600;
+    outline: none;
+}
+.text-input:focus { border-color: #2563eb; background: #fff; }
+
+/* Variations : 7 boutons -> wrap sur mobile */
+.variation-switch { flex-wrap: wrap; }
+.variation-switch button { min-width: calc(25% - 6px); font-size: 0.85rem; padding: 10px 4px; }
+
+/* Header resultats + bouton copier */
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.result-header h2 { margin: 0; }
+.btn-copy {
+    padding: 8px 16px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-copy:hover { background: #1d4ed8; }
+.btn-copy.copied { background: #16a34a; }
