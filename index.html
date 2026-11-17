@@ -9,22 +9,26 @@
 </head>
 <body>
 
+    <!-- ECRAN LOGIN -->
     <div id="login-screen" class="screen active">
         <div class="login-box">
             <h1 class="logo">Regis-Bet</h1>
-            <p class="subtitle">Accès sécurisé</p>
-            <input type="password" id="password-input" placeholder="Mot de passe" onkeypress="if(event.key==='Enter') checkPassword()">
+            <p class="subtitle">Acces securise</p>
+            <input type="password" id="password-input" placeholder="Mot de passe"
+                   onkeydown="if(event.key==='Enter') checkPassword()">
             <button onclick="checkPassword()">Entrer</button>
             <p id="error-msg"></p>
         </div>
     </div>
 
+    <!-- ECRAN PRINCIPAL -->
     <div id="main-screen" class="screen">
         <header>
             <h1 class="logo">Regis-Bet</h1>
-            <p class="subtitle">Calculateur de répartition</p>
+            <p class="subtitle">Calculateur de repartition</p>
         </header>
 
+        <!-- ISSUES -->
         <div class="card">
             <h2>Issues (Cochez-en 2)</h2>
             <div class="issues-grid">
@@ -46,6 +50,7 @@
             </div>
         </div>
 
+        <!-- MODE -->
         <div class="card">
             <div class="mode-switch">
                 <button id="btn-mode-total" class="active" onclick="setMode('total')">Montant Total</button>
@@ -53,37 +58,39 @@
             </div>
 
             <div id="input-total" class="input-container">
-                <label>Montant à miser (FCFA)</label>
+                <label>Montant total a miser (FCFA)</label>
                 <input type="number" step="0.01" id="montant-total" value="1000">
             </div>
 
             <div id="input-gain" class="input-container" style="display:none;">
                 <div class="gain-inputs">
                     <div>
-                        <label>Gain Min</label>
+                        <label>Gain net Min (FCFA)</label>
                         <input type="number" step="0.01" id="gain-min" value="100">
                     </div>
                     <div>
-                        <label>Gain Max</label>
+                        <label>Gain net Max (FCFA)</label>
                         <input type="number" step="0.01" id="gain-max" value="150">
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- VARIATION -->
         <div class="card">
             <label>Variation Anti-Bot</label>
             <div class="variation-switch">
                 <button onclick="setVariation(0, this)" class="active">0%</button>
-                <button onclick="setVariation(0.03, this)">±3%</button>
-                <button onclick="setVariation(0.05, this)">±5%</button>
+                <button onclick="setVariation(0.03, this)">+/- 3%</button>
+                <button onclick="setVariation(0.05, this)">+/- 5%</button>
             </div>
         </div>
 
         <button class="btn-calc" onclick="calculer()">Calculer</button>
 
+        <!-- RESULTATS -->
         <div id="resultats" class="result-box">
-            <h2>Répartition</h2>
+            <h2>Repartition</h2>
             <div id="resultat-contenu"></div>
         </div>
     </div>
