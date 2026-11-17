@@ -9,11 +9,11 @@
 </head>
 <body>
 
-    <!-- ========== ECRAN LOGIN ========== -->
+    <!-- ========== ÉCRAN LOGIN ========== -->
     <div id="login-screen" class="screen active">
         <div class="login-box">
             <h1 class="logo">Regis-Bet</h1>
-            <p class="subtitle">Acces securise</p>
+            <p class="subtitle">Accès sécurisé</p>
             <input type="password" id="password-input" placeholder="Mot de passe"
                    onkeydown="if(event.key==='Enter') checkPassword()">
             <button onclick="checkPassword()">Entrer</button>
@@ -21,31 +21,31 @@
         </div>
     </div>
 
-    <!-- ========== ECRAN PRINCIPAL ========== -->
+    <!-- ========== ÉCRAN PRINCIPAL ========== -->
     <div id="main-screen" class="screen">
         <header>
             <h1 class="logo">Regis-Bet</h1>
-            <p class="subtitle">Calculateur de repartition</p>
+            <p class="subtitle">Calculateur de répartition</p>
         </header>
 
-        <!-- SECTION 1 : EQUIPES -->
+        <!-- 1 : ÉQUIPES -->
         <div class="card">
-            <h2>1. Equipes</h2>
+            <h2>1. Équipes</h2>
             <div class="teams-grid">
                 <div>
-                    <label class="mini-label">Equipe Favorite</label>
+                    <label class="mini-label">Équipe favorite</label>
                     <input type="text" id="team-fav" placeholder="Ex: Real Madrid" class="text-input">
                 </div>
                 <div>
-                    <label class="mini-label">Equipe Perdante</label>
+                    <label class="mini-label">Équipe perdante</label>
                     <input type="text" id="team-out" placeholder="Ex: Barcelone" class="text-input">
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 2 : ISSUES -->
+        <!-- 2 : ISSUES -->
         <div class="card">
-            <h2>2. Issues (Cochez-en 2)</h2>
+            <h2>2. Issues (cochez-en 2)</h2>
             <div class="issues-grid">
                 <label class="issue-box">
                     <input type="checkbox" id="chk-forte" onchange="limitCheckboxes('chk-forte')">
@@ -65,34 +65,34 @@
             </div>
         </div>
 
-        <!-- SECTION 3 : MODE -->
+        <!-- 3 : MODE -->
         <div class="card">
             <h2>3. Mode de calcul</h2>
             <div class="mode-switch">
-                <button id="btn-mode-total" class="active" onclick="setMode('total')">Montant Total</button>
-                <button id="btn-mode-gain" onclick="setMode('gain')">Gain Cible</button>
+                <button id="btn-mode-total" class="active" onclick="setMode('total')">Montant total</button>
+                <button id="btn-mode-gain" onclick="setMode('gain')">Gain cible</button>
             </div>
 
             <div id="input-total" class="input-container">
-                <label>Montant total a miser (FCFA)</label>
+                <label>Montant total à miser (FCFA)</label>
                 <input type="number" step="0.01" id="montant-total" value="1000">
             </div>
 
             <div id="input-gain" class="input-container" style="display:none;">
                 <div class="gain-inputs">
                     <div>
-                        <label>Gain net Min (FCFA)</label>
+                        <label>Gain net min (FCFA)</label>
                         <input type="number" step="0.01" id="gain-min" value="100">
                     </div>
                     <div>
-                        <label>Gain net Max (FCFA)</label>
+                        <label>Gain net max (FCFA)</label>
                         <input type="number" step="0.01" id="gain-max" value="150">
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 3B : BONUS -->
+        <!-- 3B : BONUS -->
         <div class="card">
             <h2>3b. Bonus / Free Bet (optionnel)</h2>
             <label class="mini-label">Sur quel compte appliquer le bonus ?</label>
@@ -105,13 +105,13 @@
             <div id="bonus-montant-container" class="input-container" style="display:none;">
                 <label>Montant du bonus (FCFA)</label>
                 <input type="number" step="0.01" id="bonus-montant" value="500">
-                <p class="hint">Le bonus est une mise gratuite : tu ne la deduis pas de ta poche, mais tu touches le retour si elle gagne.</p>
+                <p class="hint">Le bonus est une mise gratuite : il n'est pas déduit de ta poche, et tu touches seulement le gain (mise non rendue) s'il gagne.</p>
             </div>
         </div>
 
-        <!-- SECTION 4 : VARIATION -->
+        <!-- 4 : VARIATION -->
         <div class="card">
-            <h2>4. Variation Anti-Bot</h2>
+            <h2>4. Variation anti-bot</h2>
             <div class="variation-switch">
                 <button onclick="setVariation(0, this)" class="active">0%</button>
                 <button onclick="setVariation(0.01, this)">&plusmn;1%</button>
@@ -125,16 +125,16 @@
 
         <button class="btn-calc" onclick="calculer()">Calculer</button>
 
-        <!-- ========== RESULTATS ========== -->
+        <!-- ========== RÉSULTATS ========== -->
         <div id="resultats" class="result-box">
             <div class="result-header">
-                <h2>Repartition</h2>
+                <h2>Répartition</h2>
                 <button id="btn-copy" class="btn-copy" onclick="copierRecap()">Copier</button>
             </div>
             <div id="resultat-contenu"></div>
         </div>
     </div>
 
-    <script src="script.js?v=5"></script>
+    <script src="script.js?v=6"></script>
 </body>
 </html>
