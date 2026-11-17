@@ -1,8 +1,9 @@
 const SECRET = "reg@@s";
 let currentMode = "total";
 let currentVariation = 0;
+let rapports = [];
 
-const $ = (id) => document.getElementById(id);
+const $ =(id) => document.getElementById(id);
 const num = (id) => parseFloat(String($(id).value).replace(/\s/g, "").replace(",", "."));
 const rnd = (a, b) => Math.random() * (b - a) + a;
 const r2 = (x) => Math.round(x * 100) / 100;
@@ -113,6 +114,21 @@ function carte(n, r) {
     const alerte = r.faible
         ? '<div class="muted" style="color:var(--bad);font-weight:700;margin-bottom:8px">⚠️ Montant trop faible. Misez au minimum ' + r.mm.toLocaleString("fr-FR") + ' F. Calcul fait pour ce minimum.</div>'
         : "";
+    const lignes = [
+        "REGIS-BET - " + titre,
+        "",
+        "Compte 1 : miser sur " + pari(r.p[0]) + " (cote " + r.o1.toFixed(2) + ") : " + fcfa(r.m1),
+        "Compte 2 : miser sur " + pari(r.p[1]) + " (cote " + r.o2.toFixed(2) + ") : " + fcfa(r.m2),
+        "Total misé : " + fcfa(r.tot),
+        "",
+        "Si " + cond(r.p[0]) + " : reçu " + fcfa(r.m1 * r.o1) + " | gain " + signe(r.g1),
+        "Si " + cond(r.p[1]) + " : reçu " + fcfa(r.m2 * r.o2) + " | gain " + signe(r.g2),
+        "Si " + cond(r.tr) + " : tu perds tout | " + signe(-r.tot),
+        "",
+        "Mise minimum pour être gagnant : " + r.mm.toLocaleString("fr-FR") + " F"
+    ];
+    if (r.faible) lignes.splice(1, 0, "ATTENTION : montant trop faible, misez au minimum " + r.mm.toLocaleString("fr-FR") + " F.");
+    rapports[n] = lignes.join("\n");
     return '<div class="result ok" style="margin-bottom:12px">' +
         '<div class="fail-title" style="color:var(--text);font-size:16px">' + titre + '</div>' +
         alerte +
@@ -123,7 +139,28 @@ function carte(n, r) {
         '<div class="row"><div><div>Si ' + cond(r.p[1]) + '</div><div class="sub">tu reçois ' + fcfa(r.m2 * r.o2) + '</div></div><div class="amount" style="color:var(--ok)">' + signe(r.g2) + '</div></div>' +
         '<div class="row"><div><div>Si ' + cond(r.tr) + '</div><div class="sub">tu perds tout</div></div><div class="amount" style="color:var(--bad)">' + signe(-r.tot) + '</div></div>' +
         '<div class="sub">Mise minimum pour être gagnant : ' + r.mm.toLocaleString("fr-FR") + ' F</div>' +
+        '<button class="btn btn-copy" onclick="copierRapport(' + n + ', this)">Copier cette option</button>' +
         '</div>';
+}
+
+function copierRapport(n, btn) {
+    const texte = rapports[n];
+    if (!texte) return;
+    const ok = () => {
+        const old = btn.textContent;
+        btn.textContent = "Copié ✓";
+        btn.classList.add("copied");
+        setTimeout(() => { btn.textContent = old; btn.classList.remove("copied"); }, 1500);
+    };
+    const fb = () => {
+        const ta = document.createElement("textarea");
+        ta.value = texte; ta.style.cssText = "position:fixed;opacity:0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); ok(); } catch (e) { alert("Copie impossible."); }
+        document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texte).then(ok).catch(fb);
+    else fb();
 }
 
 function calculer() {
@@ -141,6 +178,7 @@ function calculer() {
         gMoy = (gMin + gMax) / 2;
     }
 
+    rapports = [];
     const rs = PAIRES.map(p => calcPaire(p, cotes, total, gMin, gMoy));
     afficher(
         '<div class="muted" style="margin-bottom:10px;font-weight:600">⚠️ Tu récupères ta mise seulement si l\'un de tes 2 paris passe. Si le 3e résultat arrive, tu perds tout.</div>' +
