@@ -1,7 +1,7 @@
 const SECRET = "reg@@s";
 let currentMode = "total";
 let currentVariation = 0;
-let selection = [];
+let choix = null;
 let recap = "";
 
 const $ = (id) => document.getElementById(id);
@@ -10,6 +10,12 @@ const rnd = (a, b) => Math.random() * (b - a) + a;
 const r2 = (x) => Math.round(x * 100) / 100;
 const fcfa = (n) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " F";
 const signe = (n) => (n >= 0 ? "+" : "") + fcfa(n);
+
+const ISSUES = {
+    fn: { couvre: ["fav", "nul"], reste: "out" },
+    fo: { couvre: ["fav", "out"], reste: "nul" },
+    no: { couvre: ["nul", "out"], reste: "fav" }
+};
 
 function checkPassword() {
     if ($("password-input").value === SECRET) {
@@ -27,33 +33,38 @@ function noms() {
     };
 }
 
-function issues() {
+function labelIssue(k) {
     const { f, o } = noms();
-    const a = num("cote-fav"), x = num("cote-nul"), b = num("cote-out");
-    const dc = (p, q) => (isNaN(p) || isNaN(q) || p <= 1 || q <= 1) ? NaN : 1 / (1 / p + 1 / q);
-    return {
-        fn: { label: f + " ou nul",  cote: dc(a, x), couvre: ["fav", "nul"] },
-        fo: { label: f + " ou " + o, cote: dc(a, b), couvre: ["fav", "out"] },
-        no: { label: "Nul ou " + o,  cote: dc(x, b), couvre: ["nul", "out"] }
-    };
+    if (k === "fn") return f + " ou nul";
+    if (k === "fo") return f + " ou " + o;
+    return "Nul ou " + o;
 }
 
-function majIssues() {
-    const is = issues();
-    ["fn", "fo", "no"].forEach(k => {
-        $("lbl-" + k).textContent = is[k].label;
-        $("d-" + k).textContent = isNaN(is[k].cote) ? "-" : "code " + is[k].cote.toFixed(2);
-    });
+function labelResultat(key) {
+    const { f, o } = noms();
+    if (key === "fav") return f + " gagne";
+    if (key === "out") return o + " gagne";
+    return "Match nul";
+}
+
+function majLabels() {
+    ["fn", "fo", "no"].forEach(k => { $("lbl-" + k).textContent = labelIssue(k); });
+    if (choix) {
+        $("lbl-c1").textContent = "Code : " + labelIssue(choix);
+        $("lbl-c2").textContent = "Code : " + labelResultat(ISSUES[choix].reste);
+    } else {
+        $("lbl-c1").textContent = "Issue choisie";
+        $("lbl-c2").textContent = "Résultat restant";
+    }
 }
 document.addEventListener("input", (e) => {
-    if (["team-fav", "team-out", "cote-fav", "cote-nul", "cote-out"].includes(e.target.id)) majIssues();
+    if (["team-fav", "team-out"].includes(e.target.id)) majLabels();
 });
 
-function toggleIssue(k) {
-    const i = selection.indexOf(k);
-    if (i >= 0) selection.splice(i, 1);
-    else { selection.push(k); if (selection.length > 2) selection.shift(); }
-    ["fn", "fo", "no"].forEach(key => $("issue-" + key).classList.toggle("selected", selection.includes(key)));
+function choisir(k) {
+    choix = k;
+    ["fn", "fo", "no"].forEach(key => $("issue-" + key).classList.toggle("selected", key === k));
+    majLabels();
 }
 
 function setMode(mode) {
@@ -101,17 +112,24 @@ function miseMin(sel, d1, d2) {
 }
 
 function calculer() {
-    if (selection.length !== 2) return echec("choisis exactement 2 issues.");
-    const is = issues();
-    const sel = selection.map(k => is[k]);
-    if (sel.some(s => isNaN(s.cote))) return echec("entre les 3 codes (supérieurs à 1).");
+    if (!choix) return echec("choisis une issue (étape 2).");
+    const d1 = num("code-1"), d2 = num("code-2");
+    if (isNaN(d1) || isNaN(d2) || d1 <= 1 || d2 <= 1) return echec("entre les 2 codes (supérieurs à 1).");
 
-    const d1 = sel[0].cote, d2 = sel[1].cote;
+    const reste = ISSUES[choix].reste;
+    const sel = [
+        { label: labelIssue(choix), cote: d1, couvre: ISSUES[choix].couvre },
+        { label: labelResultat(reste), cote: d2, couvre: [reste] }
+    ];
+
     const S = 1 / d1 + 1 / d2;
     if (S >= 1) {
         const perte = (1 - 1 / S) * 100;
         return echec("avec ces codes, aucun montant ne peut être gagnant : même en misant beaucoup, tu perds environ " + perte.toFixed(1) + " % de ta mise. Ne mise pas.");
     }
+
+    const mm = miseMin(sel, d1, d2);
+    if (!mm) return echec("les codes sont trop proches : il faudrait miser plus de 1 000 000 F. Ne mise pas.");
 
     let T, gainBas = 0;
     if (currentMode === "total") {
@@ -124,12 +142,11 @@ function calculer() {
         gainBas = gMin;
     }
 
+    let faible = false;
+    if (T < mm) { T = mm; faible = true; gainBas = 0; }
+
     const R = T / S;
-    const resultats = [
-        { key: "fav", label: noms().f + " gagne" },
-        { key: "nul", label: "Match nul" },
-        { key: "out", label: noms().o + " gagne" }
-    ];
+    const resultats = ["fav", "nul", "out"].map(k => ({ key: k, label: labelResultat(k) }));
 
     let best = null;
     for (let i = 0; i <= 300 && !best; i++) {
@@ -148,27 +165,31 @@ function calculer() {
     }
     if (!best) return echec("pas de gain garanti avec cette variation, essaie une variation plus petite.");
 
-    const mm = miseMin(sel, d1, d2);
-    const mmTxt = mm ? "Mise minimum pour être gagnant : " + mm.toLocaleString("fr-FR") + " F (francs entiers)"
-                     : "Mise minimum : plus de 1 000 000 F";
-    const alerte = (mm && best.tot < mm) ? "⚠️ Ton montant est inférieur au minimum : le gain peut disparaître à l'arrondi." : "";
+    const mmTxt = "Mise minimum pour être gagnant : " + mm.toLocaleString("fr-FR") + " F (francs entiers)";
+    const alerte = faible
+        ? "⚠️ Répartition possible, mais ton montant est trop faible. Misez au minimum " + mm.toLocaleString("fr-FR") + " F. Le calcul ci-dessous est fait pour ce minimum."
+        : "";
 
     const rapport = [
         "REGIS-BET - RAPPORT",
-        "",
+        ""
+    ];
+    if (faible) rapport.push(alerte, "");
+    rapport.push(
         "MISES",
         sel[0].label + " (code " + d1.toFixed(2) + ") : " + fcfa(best.m1),
         sel[1].label + " (code " + d2.toFixed(2) + ") : " + fcfa(best.m2),
         "Total misé : " + fcfa(best.tot),
         "",
         "RÉSULTATS"
-    ];
+    );
     best.lignes.forEach(l => rapport.push(l.label + " : reçu " + fcfa(l.recu) + " | gain " + signe(l.net)));
     rapport.push("", "Gain minimum garanti : " + signe(best.gmin), mmTxt);
     recap = rapport.join("\n");
 
     afficher(
         '<div class="result ok">' +
+        (alerte ? '<div class="fail-title" style="font-size:15px">' + alerte + '</div>' : '') +
         '<div class="gain-label">Gain minimum garanti</div>' +
         '<div class="gain-value">' + signe(best.gmin) + '</div>' +
         '<div class="section-t">Mises</div>' +
@@ -180,7 +201,6 @@ function calculer() {
             '<div class="row"><div><div>' + l.label + '</div><div class="sub">tu reçois ' + fcfa(l.recu) + '</div></div><div class="amount" style="color:var(--ok)">' + signe(l.net) + '</div></div>'
         ).join("") +
         '<div class="section-t">' + mmTxt + '</div>' +
-        (alerte ? '<div class="muted">' + alerte + '</div>' : '') +
         '<button class="btn btn-copy" onclick="copierRecap(this)">Copier le rapport</button>' +
         '</div>'
     );
