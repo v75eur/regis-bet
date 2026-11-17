@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Regis-Bet</title>
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -92,6 +92,23 @@
             </div>
         </div>
 
+        <!-- SECTION 3B : BONUS -->
+        <div class="card">
+            <h2>3b. Bonus / Free Bet (optionnel)</h2>
+            <label class="mini-label">Sur quel compte appliquer le bonus ?</label>
+            <div class="mode-switch" style="margin-bottom:12px;">
+                <button id="btn-bonus-none" class="active" onclick="setBonusCible('none')">Aucun</button>
+                <button id="btn-bonus-1" onclick="setBonusCible('1')">Compte 1</button>
+                <button id="btn-bonus-2" onclick="setBonusCible('2')">Compte 2</button>
+            </div>
+
+            <div id="bonus-montant-container" class="input-container" style="display:none;">
+                <label>Montant du bonus (FCFA)</label>
+                <input type="number" step="0.01" id="bonus-montant" value="500">
+                <p class="hint">Le bonus est une mise gratuite : tu ne la deduis pas de ta poche, mais tu touches le retour si elle gagne.</p>
+            </div>
+        </div>
+
         <!-- SECTION 4 : VARIATION -->
         <div class="card">
             <h2>4. Variation Anti-Bot</h2>
@@ -118,6 +135,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=5"></script>
 </body>
 </html>

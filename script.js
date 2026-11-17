@@ -1,6 +1,7 @@
 const SECRET = "reg@@s";
 let currentMode = "total";
 let currentVariation = 0;
+let currentBonusCible = "none";
 let dernierRecapTexte = "";
 
 /* ================= UTILITAIRES ================= */
@@ -52,6 +53,15 @@ function setVariation(val, btn) {
     btn.classList.add("active");
 }
 
+/* ================= BONUS ================= */
+function setBonusCible(val) {
+    currentBonusCible = val;
+    document.getElementById("btn-bonus-none").classList.toggle("active", val === "none");
+    document.getElementById("btn-bonus-1").classList.toggle("active", val === "1");
+    document.getElementById("btn-bonus-2").classList.toggle("active", val === "2");
+    document.getElementById("bonus-montant-container").style.display = (val === "none") ? "none" : "block";
+}
+
 /* ================= CALCUL PRINCIPAL ================= */
 function calculer() {
     const teamFav = document.getElementById("team-fav").value.trim() || "Equipe Favorite";
@@ -81,13 +91,6 @@ function calculer() {
     const c2 = selected[1].cote;
     const marge = (1 / c1) + (1 / c2);
 
-    if (marge >= 1) {
-        resDiv.style.display = "block";
-        resContent.innerHTML = '<p class="danger"><strong>Impossible de garantir un gain !</strong><br>Marge bookmaker trop elevee (' + formatPct(marge) + '). Il faut une marge < 100%.</p>';
-        dernierRecapTexte = "Calcul impossible : marge trop elevee (" + formatPct(marge) + ")";
-        return;
-    }
-
     /* --- Montant total --- */
     let montantTotal, gainCibleMoyen;
     if (currentMode === "total") {
@@ -104,88 +107,91 @@ function calculer() {
         montantTotal = gainCibleMoyen / (1 - marge);
     }
 
+    /* --- Bonus --- */
+    let bonusMontant = 0;
+    if (currentBonusCible !== "none") {
+        bonusMontant = parseFloat(document.getElementById("bonus-montant").value);
+        if (isNaN(bonusMontant) || bonusMontant <= 0) { alert("Montant bonus invalide."); return; }
+    }
+
     /* --- Mises theoriques --- */
     let mise1Base = (montantTotal * c2) / (c1 + c2);
     let mise2Base = (montantTotal * c1) / (c1 + c2);
 
-    /* --- Variation anti-bot SAFE --- */
+    /* --- Variation anti-bot --- */
     let mise1 = mise1Base, mise2 = mise2Base;
     let variation1 = 0, variation2 = 0;
-
     if (currentVariation > 0) {
-        let ok = false;
-        for (let i = 0; i < 30; i++) {
-            const v1 = rnd(-currentVariation, currentVariation);
-            const v2 = rnd(-currentVariation, currentVariation);
-            const m1 = mise1Base * (1 + v1);
-            const m2 = mise2Base * (1 + v2);
-            const totalV = m1 + m2;
-            const g1 = m1 * c1 - totalV;
-            const g2 = m2 * c2 - totalV;
-            if (g1 > 0 && g2 > 0) {
-                mise1 = m1; mise2 = m2;
-                variation1 = v1; variation2 = v2;
-                ok = true;
-                break;
-            }
-        }
-        if (!ok) {
-            const v = rnd(-currentVariation, currentVariation);
-            mise1 = mise1Base * (1 + v);
-            mise2 = mise2Base * (1 + v);
-            variation1 = v; variation2 = v;
-        }
+        const v1 = rnd(-currentVariation, currentVariation);
+        const v2 = rnd(-currentVariation, currentVariation);
+        mise1 = mise1Base * (1 + v1);
+        mise2 = mise2Base * (1 + v2);
+        variation1 = v1; variation2 = v2;
     }
 
-    /* --- Arrondis --- */
     mise1 = Math.round(mise1 * 100) / 100;
     mise2 = Math.round(mise2 * 100) / 100;
-    const totalMise = mise1 + mise2;
 
-    const retour1 = mise1 * c1;
-    const retour2 = mise2 * c2;
-    const gainNet1 = retour1 - totalMise;
-    const gainNet2 = retour2 - totalMise;
+    /* --- Bonus applique --- */
+    let mise1Bonus = 0, mise2Bonus = 0;
+    if (currentBonusCible === "1") mise1Bonus = bonusMontant;
+    if (currentBonusCible === "2") mise2Bonus = bonusMontant;
+
+    const totalMiseReelle = mise1 + mise2;
+    const totalMiseAvecBonus = totalMiseReelle + mise1Bonus + mise2Bonus;
+
+    /* --- Retours et gains --- */
+    const retour1 = (mise1 + mise1Bonus) * c1;
+    const retour2 = (mise2 + mise2Bonus) * c2;
+    const gainNet1 = retour1 - totalMiseReelle;
+    const gainNet2 = retour2 - totalMiseReelle;
     const gainMinReel = Math.min(gainNet1, gainNet2);
     const gainMaxReel = Math.max(gainNet1, gainNet2);
+    const arbitrable = marge < 1;
 
-    /* --- Affichage HTML --- */
+    /* --- HTML --- */
+    const bonusLine = (currentBonusCible !== "none")
+        ? '<div class="res-line"><span>Bonus applique sur ' + (currentBonusCible === "1" ? selected[0].name : selected[1].name) + '</span><span class="highlight">' + formatFCFA(bonusMontant) + '</span></div>'
+        : '';
+
+    const margeLine = arbitrable
+        ? '<div class="res-line"><span>Marge bookmaker</span><span class="up">' + formatPct(marge) + ' (arbitrage OK)</span></div>'
+        : '<div class="res-line"><span>Marge bookmaker</span><span class="down">' + formatPct(marge) + ' (defavorable)</span></div>';
+
     const html = [
-        // equipes
         '<div class="section-title">Equipes</div>',
         '<div class="res-line"><span>Equipe Favorite</span><span>' + teamFav + '</span></div>',
         '<div class="res-line"><span>Equipe Perdante</span><span>' + teamOut + '</span></div>',
 
-        // mises
         '<div class="section-title">Mises a placer</div>',
         '<div class="res-line"><span>Mise ' + selected[0].name + ' (' + selected[0].team + ') - cote ' + c1 + '</span><span class="highlight">' + formatFCFA(mise1) + '</span></div>',
         '<div class="res-line"><span>Mise ' + selected[1].name + ' (' + selected[1].team + ') - cote ' + c2 + '</span><span class="highlight">' + formatFCFA(mise2) + '</span></div>',
-        '<div class="res-line total"><span>Total mise</span><span>' + formatFCFA(totalMise) + '</span></div>',
+        bonusLine,
+        '<div class="res-line total"><span>Total sorti de ta poche</span><span>' + formatFCFA(totalMiseReelle) + '</span></div>',
+        (currentBonusCible !== "none"
+            ? '<div class="res-line"><span>Total place (avec bonus)</span><span>' + formatFCFA(totalMiseAvecBonus) + '</span></div>'
+            : ''),
 
-        // variation
         '<div class="section-title">Variation Anti-Bot appliquee</div>',
         '<div class="res-line"><span>Sur ' + selected[0].name + '</span><span class="' + (variation1 >= 0 ? 'up' : 'down') + '">' + (variation1 >= 0 ? '+' : '') + (variation1*100).toFixed(2) + '%</span></div>',
         '<div class="res-line"><span>Sur ' + selected[1].name + '</span><span class="' + (variation2 >= 0 ? 'up' : 'down') + '">' + (variation2 >= 0 ? '+' : '') + (variation2*100).toFixed(2) + '%</span></div>',
 
-        // retour / gain
-        '<div class="section-title">Gains si l issue passe</div>',
+        '<div class="section-title">Resultat si une issue passe</div>',
         '<div class="res-line"><span>Retour si ' + selected[0].name + ' (' + selected[0].team + ')</span><span>' + formatFCFA(retour1) + '</span></div>',
-        '<div class="res-line"><span>Gain net si ' + selected[0].name + ' (' + selected[0].team + ')</span><span class="highlight">+' + formatFCFA(gainNet1) + '</span></div>',
+        '<div class="res-line"><span>Gain net si ' + selected[0].name + ' (' + selected[0].team + ')</span><span class="' + (gainNet1 >= 0 ? 'up' : 'down') + '">' + (gainNet1 >= 0 ? '+' : '') + formatFCFA(gainNet1) + '</span></div>',
         '<div class="res-line"><span>Retour si ' + selected[1].name + ' (' + selected[1].team + ')</span><span>' + formatFCFA(retour2) + '</span></div>',
-        '<div class="res-line"><span>Gain net si ' + selected[1].name + ' (' + selected[1].team + ')</span><span class="highlight">+' + formatFCFA(gainNet2) + '</span></div>',
+        '<div class="res-line"><span>Gain net si ' + selected[1].name + ' (' + selected[1].team + ')</span><span class="' + (gainNet2 >= 0 ? 'up' : 'down') + '">' + (gainNet2 >= 0 ? '+' : '') + formatFCFA(gainNet2) + '</span></div>',
 
-        // recap
         '<div class="section-title">Recapitulatif</div>',
-        '<div class="res-line"><span>Marge bookmaker</span><span>' + formatPct(marge) + '</span></div>',
-        '<div class="res-line"><span>Gain net garanti (min)</span><span class="highlight">+' + formatFCFA(gainMinReel) + '</span></div>',
-        '<div class="res-line"><span>Gain net max</span><span class="highlight">+' + formatFCFA(gainMaxReel) + '</span></div>',
-        '<div class="res-line total"><span>Total gagne (si une issue passe)</span><span>' + formatFCFA(totalMise + gainMinReel) + ' a ' + formatFCFA(totalMise + gainMaxReel) + '</span></div>'
+        margeLine,
+        '<div class="res-line"><span>Gain net garanti (min)</span><span class="' + (gainMinReel >= 0 ? 'up' : 'down') + '">' + (gainMinReel >= 0 ? '+' : '') + formatFCFA(gainMinReel) + '</span></div>',
+        '<div class="res-line"><span>Gain net max</span><span class="' + (gainMaxReel >= 0 ? 'up' : 'down') + '">' + (gainMaxReel >= 0 ? '+' : '') + formatFCFA(gainMaxReel) + '</span></div>'
     ].join('');
 
     resContent.innerHTML = html;
     resDiv.style.display = "block";
 
-    /* --- Recap TEXTE pour presse-papier --- */
+    /* --- Texte pour presse-papier --- */
     const sep = "================================";
     const lines = [
         sep,
@@ -195,41 +201,36 @@ function calculer() {
         "Equipe Perdante : " + teamOut,
         "",
         "-- MISES --",
-        selected[0].name + " (" + selected[0].team + ") | cote " + c1 + " | " + formatFCFA(mise1),
-        selected[1].name + " (" + selected[1].team + ") | cote " + c2 + " | " + formatFCFA(mise2),
-        "TOTAL MISE : " + formatFCFA(totalMise),
+        selected[0].name + " (" + selected[0].team + ") | cote " + c1 + " | " + formatFCFA(mise1) + (mise1Bonus > 0 ? " + bonus " + formatFCFA(mise1Bonus) : ""),
+        selected[1].name + " (" + selected[1].team + ") | cote " + c2 + " | " + formatFCFA(mise2) + (mise2Bonus > 0 ? " + bonus " + formatFCFA(mise2Bonus) : ""),
+        "TOTAL SORTI DE TA POCHE : " + formatFCFA(totalMiseReelle),
         "",
         "-- VARIATION --",
         selected[0].name + " : " + (variation1 >= 0 ? '+' : '') + (variation1*100).toFixed(2) + "%",
         selected[1].name + " : " + (variation2 >= 0 ? '+' : '') + (variation2*100).toFixed(2) + "%",
         "",
-        "-- GAINS --",
-        "Si " + selected[0].name + " : retour " + formatFCFA(retour1) + " | gain net +" + formatFCFA(gainNet1),
-        "Si " + selected[1].name + " : retour " + formatFCFA(retour2) + " | gain net +" + formatFCFA(gainNet2),
+        "-- RESULTATS --",
+        "Si " + selected[0].name + " : retour " + formatFCFA(retour1) + " | gain net " + (gainNet1 >= 0 ? '+' : '') + formatFCFA(gainNet1),
+        "Si " + selected[1].name + " : retour " + formatFCFA(retour2) + " | gain net " + (gainNet2 >= 0 ? '+' : '') + formatFCFA(gainNet2),
         "",
         "-- RECAP --",
-        "Marge bookmaker : " + formatPct(marge),
-        "Gain garanti min : +" + formatFCFA(gainMinReel),
-        "Gain max : +" + formatFCFA(gainMaxReel),
-        "Total gagne : " + formatFCFA(totalMise + gainMinReel) + " a " + formatFCFA(totalMise + gainMaxReel),
+        "Marge bookmaker : " + formatPct(marge) + (arbitrable ? " (arbitrage OK)" : " (defavorable)"),
+        "Gain net garanti (min) : " + (gainMinReel >= 0 ? '+' : '') + formatFCFA(gainMinReel),
+        "Gain net max : " + (gainMaxReel >= 0 ? '+' : '') + formatFCFA(gainMaxReel),
         sep
     ];
     dernierRecapTexte = lines.join('\n');
 }
 
-/* ================= COPIE PRESSE-PAPIER ================= */
+/* ================= COPIE ================= */
 function copierRecap() {
     if (!dernierRecapTexte) { alert("Calcule d'abord une repartition."); return; }
-
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(dernierRecapTexte).then(() => {
-            flashCopie("Copie !");
-        }).catch(() => fallbackCopie());
+        navigator.clipboard.writeText(dernierRecapTexte).then(() => flashCopie("Copie !")).catch(() => fallbackCopie());
     } else {
         fallbackCopie();
     }
 }
-
 function fallbackCopie() {
     const ta = document.createElement("textarea");
     ta.value = dernierRecapTexte;
@@ -241,7 +242,6 @@ function fallbackCopie() {
     catch (e) { alert("Copie impossible sur ce navigateur."); }
     document.body.removeChild(ta);
 }
-
 function flashCopie(msg) {
     const btn = document.getElementById("btn-copy");
     const old = btn.textContent;
