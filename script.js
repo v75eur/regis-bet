@@ -54,8 +54,7 @@ function setVariation(val, btn) {
 function setBonusCible(val) {
     currentBonusCible = val;
     document.getElementById("btn-bonus-none").classList.toggle("active", val === "none");
-    document.getElementById("btn-bonus-1").classList.toggle("active", val === "1");
-    document.getElementById("btn-bonus-2").classList.toggle("active", val === "2");
+    document.getElementById("btn-bonus-1").classList.toggle("active", val === "auto");
     document.getElementById("bonus-montant-container").style.display = (val === "none") ? "none" : "block";
 }
 
@@ -92,7 +91,7 @@ function calculer() {
     if (currentBonusCible !== "none") {
         const b = parseFloat(document.getElementById("bonus-montant").value);
         if (isNaN(b) || b <= 0) return echec("montant du bonus invalide.");
-        if (currentBonusCible === "1") B1 = b; else B2 = b;
+        if (c1 >= c2) B1 = b; else B2 = b;
     }
     const k1 = B1 * (c1 - 1) / c1, k2 = B2 * (c2 - 1) / c2;
     const k = k1 + k2;

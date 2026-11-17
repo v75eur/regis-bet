@@ -95,11 +95,10 @@
         <!-- 3B : BONUS -->
         <div class="card">
             <h2>3b. Bonus / Free Bet (optionnel)</h2>
-            <label class="mini-label">Sur quel compte appliquer le bonus ?</label>
+            <label class="mini-label">Bonus</label>
             <div class="mode-switch" style="margin-bottom:12px;">
                 <button id="btn-bonus-none" class="active" onclick="setBonusCible('none')">Aucun</button>
-                <button id="btn-bonus-1" onclick="setBonusCible('1')">Compte 1</button>
-                <button id="btn-bonus-2" onclick="setBonusCible('2')">Compte 2</button>
+                <button id="btn-bonus-1" onclick="setBonusCible('auto')">Avec bonus</button>
             </div>
 
             <div id="bonus-montant-container" class="input-container" style="display:none;">
@@ -135,6 +134,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=6"></script>
+    <script src="script.js?v=7"></script>
 </body>
 </html>
