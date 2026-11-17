@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f4f6fb">
     <title>Regis-Bet</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20">
+    <link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
 <section id="login-screen" class="screen active">
@@ -28,7 +28,7 @@
     <main class="container">
 
         <div class="card">
-            <div class="card-title"><span class="step">1</span>Équipes et cotes</div>
+            <div class="card-title"><span class="step">1</span>Équipes et cotes (1X2)</div>
             <label class="label">Équipe favorite (nom et cote)</label>
             <div class="grid-2" style="grid-template-columns:2fr 1fr;margin-bottom:12px">
                 <input type="text" id="team-fav" placeholder="Manchester City">
@@ -41,6 +41,7 @@
                 <input type="text" id="team-out" placeholder="Fulham">
                 <input type="text" inputmode="decimal" id="cote-out" placeholder="Cote">
             </div>
+            <div id="verdict" class="muted" style="margin-top:14px;font-weight:600">Entre les 3 cotes pour voir si le match passe.</div>
         </div>
 
         <div class="card">
@@ -50,6 +51,8 @@
                 <div class="issue" id="issue-fo" onclick="choisir('fo')"><div class="issue-top"><span class="tick"></span><span id="lbl-fo">Favori ou faible</span></div><span class="issue-code" id="d-fo">-</span></div>
                 <div class="issue" id="issue-no" onclick="choisir('no')"><div class="issue-top"><span class="tick"></span><span id="lbl-no">Nul ou faible</span></div><span class="issue-code" id="d-no">-</span></div>
             </div>
+            <label class="label" style="margin-top:14px">Cote de l'issue choisie sur BetPower (facultatif)</label>
+            <input type="text" inputmode="decimal" id="cote-reelle" placeholder="Laisse vide pour la cote calculée">
         </div>
 
         <div class="card">
@@ -87,6 +90,6 @@
     </main>
     <div class="bottom-bar"><button class="btn primary big" onclick="calculer()">Calculer</button></div>
 </section>
-<script src="script.js?v=20"></script>
+<script src="script.js?v=22"></script>
 </body>
 </html>

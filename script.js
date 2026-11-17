@@ -51,12 +51,32 @@ function issues() {
     };
 }
 
+/* Indique tout de suite si le match peut passer */
+function verdict() {
+    const c = lireCotes();
+    const box = $("verdict");
+    if ([c.fav, c.nul, c.out].some(v => isNaN(v) || v <= 1)) {
+        box.textContent = "Entre les 3 cotes pour voir si le match passe.";
+        box.style.color = "var(--muted)";
+        return;
+    }
+    const t = 1 / c.fav + 1 / c.nul + 1 / c.out;
+    if (t < 1) {
+        box.textContent = "✅ Ce match peut passer (total " + t.toFixed(3) + ")";
+        box.style.color = "var(--ok)";
+    } else {
+        box.textContent = "❌ Ne passe pas : tu perdrais environ " + ((1 - 1 / t) * 100).toFixed(1) + " % (total " + t.toFixed(3) + ")";
+        box.style.color = "var(--bad)";
+    }
+}
+
 function majIssues() {
     const is = issues();
     ["fn", "fo", "no"].forEach(k => {
         $("lbl-" + k).textContent = is[k].label;
         $("d-" + k).textContent = isNaN(is[k].cote) ? "-" : "cote " + is[k].cote.toFixed(2);
     });
+    verdict();
 }
 document.addEventListener("input", (e) => {
     if (["team-fav", "team-out", "cote-fav", "cote-nul", "cote-out"].includes(e.target.id)) majIssues();
@@ -64,6 +84,7 @@ document.addEventListener("input", (e) => {
 
 function choisir(k) {
     choix = k;
+    $("cote-reelle").value = "";
     ["fn", "fo", "no"].forEach(key => $("issue-" + key).classList.toggle("selected", key === k));
 }
 
@@ -118,15 +139,17 @@ function calculer() {
 
     const is = issues();
     const issue = is[choix];
+    const reelle = num("cote-reelle");
+    const d1 = (!isNaN(reelle) && reelle > 1) ? reelle : issue.cote;
+    const d2 = c[issue.reste];
     const sel = [
-        { label: issue.label, cote: issue.cote, couvre: issue.couvre },
-        { label: labelResultat(issue.reste), cote: c[issue.reste], couvre: [issue.reste] }
+        { label: issue.label, cote: d1, couvre: issue.couvre },
+        { label: labelResultat(issue.reste), cote: d2, couvre: [issue.reste] }
     ];
 
-    const d1 = sel[0].cote, d2 = sel[1].cote;
     const S = 1 / d1 + 1 / d2;
     if (S >= 1) {
-        return echec("avec ces cotes, le total 1÷cote favori + 1÷cote nul + 1÷cote faible = " + S.toFixed(3) + ". Il doit être inférieur à 1 pour gagner à coup sûr. Là tu perds environ " + ((1 - 1 / S) * 100).toFixed(1) + " % de ta mise. Ne mise pas.");
+        return echec("avec ces cotes, 1÷cote de l'issue + 1÷cote du résultat restant = " + S.toFixed(3) + ". Il doit être inférieur à 1 pour gagner à coup sûr. Là tu perds environ " + ((1 - 1 / S) * 100).toFixed(1) + " % de ta mise. Ne mise pas.");
     }
 
     const mm = miseMin(sel, d1, d2);
