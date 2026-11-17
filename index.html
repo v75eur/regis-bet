@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#f4f6fb">
     <title>Regis-Bet</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=14">
+    <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
-
 <section id="login-screen" class="screen active">
     <div class="login-card">
         <div class="brand">Regis<span>-Bet</span></div>
@@ -27,47 +25,35 @@
         <div class="brand small">Regis<span>-Bet</span></div>
         <div class="muted">Répartition</div>
     </header>
-
     <main class="container">
 
         <div class="card">
-            <div class="card-title"><span class="step">1</span>Équipes et codes</div>
-            <div class="issues">
-                <div class="issue">
-                    <input type="text" id="team-fav" placeholder="Équipe favorite" style="flex:1">
-                    <input type="text" inputmode="decimal" id="cote-fav" placeholder="Code">
-                </div>
-                <div class="issue">
-                    <div class="issue-top">Match nul</div>
-                    <input type="text" inputmode="decimal" id="cote-nul" placeholder="Code">
-                </div>
-                <div class="issue">
-                    <input type="text" id="team-out" placeholder="Équipe faible" style="flex:1">
-                    <input type="text" inputmode="decimal" id="cote-out" placeholder="Code">
-                </div>
+            <div class="card-title"><span class="step">1</span>Équipes</div>
+            <div class="grid-2">
+                <div><label class="label">Équipe favorite</label><input type="text" id="team-fav" placeholder="Manchester City"></div>
+                <div><label class="label">Équipe faible</label><input type="text" id="team-out" placeholder="Fulham"></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title"><span class="step">2</span>Issues <small>(choisis-en 2)</small></div>
+            <div class="card-title"><span class="step">2</span>Issue <small>(choisis-en 1)</small></div>
             <div class="issues">
-                <div class="issue" id="issue-fn" onclick="toggleIssue('fn')">
-                    <div class="issue-top"><span class="tick"></span><span id="lbl-fn">Favori ou nul</span></div>
-                    <div class="issue-code" id="d-fn">-</div>
-                </div>
-                <div class="issue" id="issue-fo" onclick="toggleIssue('fo')">
-                    <div class="issue-top"><span class="tick"></span><span id="lbl-fo">Favori ou faible</span></div>
-                    <div class="issue-code" id="d-fo">-</div>
-                </div>
-                <div class="issue" id="issue-no" onclick="toggleIssue('no')">
-                    <div class="issue-top"><span class="tick"></span><span id="lbl-no">Nul ou faible</span></div>
-                    <div class="issue-code" id="d-no">-</div>
-                </div>
+                <div class="issue" id="issue-fn" onclick="choisir('fn')"><div class="issue-top"><span class="tick"></span><span id="lbl-fn">Favori ou nul</span></div></div>
+                <div class="issue" id="issue-fo" onclick="choisir('fo')"><div class="issue-top"><span class="tick"></span><span id="lbl-fo">Favori ou faible</span></div></div>
+                <div class="issue" id="issue-no" onclick="choisir('no')"><div class="issue-top"><span class="tick"></span><span id="lbl-no">Nul ou faible</span></div></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title"><span class="step">3</span>Mise</div>
+            <div class="card-title"><span class="step">3</span>Codes</div>
+            <div class="issues">
+                <div class="issue"><div class="issue-top" id="lbl-c1">Issue choisie</div><input type="text" inputmode="decimal" id="code-1" placeholder="Code"></div>
+                <div class="issue"><div class="issue-top" id="lbl-c2">Résultat restant</div><input type="text" inputmode="decimal" id="code-2" placeholder="Code"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="step">4</span>Mise</div>
             <div class="segmented">
                 <button id="btn-mode-total" class="seg active" onclick="setMode('total')">Montant total</button>
                 <button id="btn-mode-gain" class="seg" onclick="setMode('gain')">Gain cible</button>
@@ -78,20 +64,14 @@
             </div>
             <div id="input-gain" class="hidden">
                 <div class="grid-2">
-                    <div>
-                        <label class="label">Gain min (FCFA)</label>
-                        <input type="text" inputmode="decimal" id="gain-min" value="100">
-                    </div>
-                    <div>
-                        <label class="label">Gain max (FCFA)</label>
-                        <input type="text" inputmode="decimal" id="gain-max" value="150">
-                    </div>
+                    <div><label class="label">Gain min (FCFA)</label><input type="text" inputmode="decimal" id="gain-min" value="100"></div>
+                    <div><label class="label">Gain max (FCFA)</label><input type="text" inputmode="decimal" id="gain-max" value="150"></div>
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title"><span class="step">4</span>Variation anti-bot</div>
+            <div class="card-title"><span class="step">5</span>Variation anti-bot</div>
             <div class="chips" id="variation-chips">
                 <button class="chip active" onclick="setVariation(0, this)">0%</button>
                 <button class="chip" onclick="setVariation(0.01, this)">±1%</button>
@@ -105,12 +85,8 @@
 
         <div id="resultats" class="hidden"></div>
     </main>
-
-    <div class="bottom-bar">
-        <button class="btn primary big" onclick="calculer()">Calculer</button>
-    </div>
+    <div class="bottom-bar"><button class="btn primary big" onclick="calculer()">Calculer</button></div>
 </section>
-
-<script src="script.js?v=15"></script>
+<script src="script.js?v=16"></script>
 </body>
 </html>
