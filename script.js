@@ -61,9 +61,9 @@ function calculer() {
     const teamFav = $("team-fav").value.trim() || "Favorite";
     const teamOut = $("team-out").value.trim() || "Adversaire";
     const defs = {
-        forte:  { name: "Favori ou Nul",  team: teamFav },
-        faible: { name: "Nul ou Adversaire", team: teamOut },
-        nul:    { name: "Favori ou Adversaire",       team: "Nul" }
+        forte:  { name: "Favori gagne",  team: teamFav },
+        faible: { name: "Adversaire gagne", team: teamOut },
+        nul:    { name: "Match nul",       team: "Nul" }
     };
 
     if (selection.length !== 2) return echec("choisis exactement 2 issues.");
@@ -109,7 +109,7 @@ function calculer() {
             ligne(sel[0], best.m1) +
             ligne(sel[1], best.m2) +
             '<div class="row total"><div>Total misé</div><div class="amount">' + fcfa(best.tot) + '</div></div>' +
-            '<button id="btn-copy" class="btn btn-copy" onclick="copierRecap()">Copier le rapport</button>' +
+            '<div class="muted" style="margin-top:10px">⚠️ Si le 3e résultat arrive, la mise est perdue.</div><button id="btn-copy" class="btn btn-copy" onclick="copierRecap()">Copier le rapport</button>' +
         '</div>'
     );
 
