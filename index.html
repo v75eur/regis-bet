@@ -2,138 +2,115 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0f1a">
     <title>Regis-Bet</title>
-    <link rel="stylesheet" href="style.css?v=5">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 
-    <!-- ========== ÉCRAN LOGIN ========== -->
-    <div id="login-screen" class="screen active">
-        <div class="login-box">
-            <h1 class="logo">Regis-Bet</h1>
-            <p class="subtitle">Accès sécurisé</p>
-            <input type="password" id="password-input" placeholder="Mot de passe"
-                   onkeydown="if(event.key==='Enter') checkPassword()">
-            <button onclick="checkPassword()">Entrer</button>
-            <p id="error-msg"></p>
-        </div>
+<!-- LOGIN -->
+<section id="login-screen" class="screen active">
+    <div class="login-card">
+        <div class="brand">Regis<span>-Bet</span></div>
+        <p class="muted">Accès sécurisé</p>
+        <input type="password" id="password-input" placeholder="Mot de passe" autocomplete="off"
+               onkeydown="if(event.key==='Enter') checkPassword()">
+        <button class="btn primary" onclick="checkPassword()">Entrer</button>
+        <p id="error-msg" class="error-text"></p>
     </div>
+</section>
 
-    <!-- ========== ÉCRAN PRINCIPAL ========== -->
-    <div id="main-screen" class="screen">
-        <header>
-            <h1 class="logo">Regis-Bet</h1>
-            <p class="subtitle">Calculateur de répartition</p>
-        </header>
+<!-- APP -->
+<section id="main-screen" class="screen">
+    <header class="topbar">
+        <div class="brand small">Regis<span>-Bet</span></div>
+        <div class="muted">Répartition 2 issues</div>
+    </header>
 
-        <!-- 1 : ÉQUIPES -->
+    <main class="container">
+
         <div class="card">
-            <h2>1. Équipes</h2>
-            <div class="teams-grid">
+            <div class="card-title"><span class="step">1</span>Équipes</div>
+            <div class="grid-2">
                 <div>
-                    <label class="mini-label">Équipe favorite</label>
-                    <input type="text" id="team-fav" placeholder="Ex: Real Madrid" class="text-input">
+                    <label class="label">Favorite</label>
+                    <input type="text" id="team-fav" placeholder="Real Madrid">
                 </div>
                 <div>
-                    <label class="mini-label">Équipe perdante</label>
-                    <input type="text" id="team-out" placeholder="Ex: Barcelone" class="text-input">
+                    <label class="label">Adversaire</label>
+                    <input type="text" id="team-out" placeholder="Barcelone">
                 </div>
             </div>
         </div>
 
-        <!-- 2 : ISSUES -->
         <div class="card">
-            <h2>2. Issues (cochez-en 2)</h2>
-            <div class="issues-grid">
-                <label class="issue-box">
-                    <input type="checkbox" id="chk-forte" onchange="limitCheckboxes('chk-forte')">
-                    <span class="issue-name">Victoire Forte</span>
-                    <input type="number" step="0.01" id="cote-forte" placeholder="Cote" class="inline-cote">
-                </label>
-                <label class="issue-box">
-                    <input type="checkbox" id="chk-faible" onchange="limitCheckboxes('chk-faible')">
-                    <span class="issue-name">Victoire Faible</span>
-                    <input type="number" step="0.01" id="cote-faible" placeholder="Cote" class="inline-cote">
-                </label>
-                <label class="issue-box">
-                    <input type="checkbox" id="chk-nul" onchange="limitCheckboxes('chk-nul')">
-                    <span class="issue-name">Match Nul</span>
-                    <input type="number" step="0.01" id="cote-nul" placeholder="Cote" class="inline-cote">
-                </label>
+            <div class="card-title"><span class="step">2</span>Issues <small>(choisis-en 2)</small></div>
+            <div class="issues">
+                <div class="issue" id="issue-forte" onclick="toggleIssue('forte')">
+                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Victoire Forte</span></div>
+                    <input type="text" inputmode="decimal" id="cote-forte" placeholder="Cote" onclick="event.stopPropagation()">
+                </div>
+                <div class="issue" id="issue-faible" onclick="toggleIssue('faible')">
+                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Victoire Faible</span></div>
+                    <input type="text" inputmode="decimal" id="cote-faible" placeholder="Cote" onclick="event.stopPropagation()">
+                </div>
+                <div class="issue" id="issue-nul" onclick="toggleIssue('nul')">
+                    <div class="issue-top"><span class="tick"></span><span class="issue-name">Match Nul</span></div>
+                    <input type="text" inputmode="decimal" id="cote-nul" placeholder="Cote" onclick="event.stopPropagation()">
+                </div>
             </div>
         </div>
 
-        <!-- 3 : MODE -->
         <div class="card">
-            <h2>3. Mode de calcul</h2>
-            <div class="mode-switch">
-                <button id="btn-mode-total" class="active" onclick="setMode('total')">Montant total</button>
-                <button id="btn-mode-gain" onclick="setMode('gain')">Gain cible</button>
+            <div class="card-title"><span class="step">3</span>Mise</div>
+            <div class="segmented">
+                <button id="btn-mode-total" class="seg active" onclick="setMode('total')">Montant total</button>
+                <button id="btn-mode-gain" class="seg" onclick="setMode('gain')">Gain cible</button>
             </div>
 
-            <div id="input-total" class="input-container">
-                <label>Montant total à miser (FCFA)</label>
-                <input type="number" step="0.01" id="montant-total" value="1000">
+            <div id="input-total">
+                <label class="label">Montant total à miser (FCFA)</label>
+                <input type="text" inputmode="decimal" id="montant-total" value="1000">
             </div>
 
-            <div id="input-gain" class="input-container" style="display:none;">
-                <div class="gain-inputs">
+            <div id="input-gain" class="hidden">
+                <div class="grid-2">
                     <div>
-                        <label>Gain net min (FCFA)</label>
-                        <input type="number" step="0.01" id="gain-min" value="100">
+                        <label class="label">Gain min (FCFA)</label>
+                        <input type="text" inputmode="decimal" id="gain-min" value="100">
                     </div>
                     <div>
-                        <label>Gain net max (FCFA)</label>
-                        <input type="number" step="0.01" id="gain-max" value="150">
+                        <label class="label">Gain max (FCFA)</label>
+                        <input type="text" inputmode="decimal" id="gain-max" value="150">
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 3B : BONUS -->
         <div class="card">
-            <h2>3b. Bonus / Free Bet (optionnel)</h2>
-            <label class="mini-label">Bonus</label>
-            <div class="mode-switch" style="margin-bottom:12px;">
-                <button id="btn-bonus-none" class="active" onclick="setBonusCible('none')">Aucun</button>
-                <button id="btn-bonus-1" onclick="setBonusCible('auto')">Avec bonus</button>
-            </div>
-
-            <div id="bonus-montant-container" class="input-container" style="display:none;">
-                <label>Montant du bonus (FCFA)</label>
-                <input type="number" step="0.01" id="bonus-montant" value="500">
-                <p class="hint">Le bonus est une mise gratuite : il n'est pas déduit de ta poche, et tu touches seulement le gain (mise non rendue) s'il gagne.</p>
+            <div class="card-title"><span class="step">4</span>Variation anti-bot</div>
+            <div class="chips" id="variation-chips">
+                <button class="chip active" onclick="setVariation(0, this)">0%</button>
+                <button class="chip" onclick="setVariation(0.01, this)">±1%</button>
+                <button class="chip" onclick="setVariation(0.02, this)">±2%</button>
+                <button class="chip" onclick="setVariation(0.03, this)">±3%</button>
+                <button class="chip" onclick="setVariation(0.05, this)">±5%</button>
+                <button class="chip" onclick="setVariation(0.07, this)">±7%</button>
+                <button class="chip" onclick="setVariation(0.10, this)">±10%</button>
             </div>
         </div>
 
-        <!-- 4 : VARIATION -->
-        <div class="card">
-            <h2>4. Variation anti-bot</h2>
-            <div class="variation-switch">
-                <button onclick="setVariation(0, this)" class="active">0%</button>
-                <button onclick="setVariation(0.01, this)">&plusmn;1%</button>
-                <button onclick="setVariation(0.02, this)">&plusmn;2%</button>
-                <button onclick="setVariation(0.03, this)">&plusmn;3%</button>
-                <button onclick="setVariation(0.05, this)">&plusmn;5%</button>
-                <button onclick="setVariation(0.07, this)">&plusmn;7%</button>
-                <button onclick="setVariation(0.10, this)">&plusmn;10%</button>
-            </div>
-        </div>
+        <div id="resultats" class="hidden"></div>
+    </main>
 
-        <button class="btn-calc" onclick="calculer()">Calculer</button>
-
-        <!-- ========== RÉSULTATS ========== -->
-        <div id="resultats" class="result-box">
-            <div class="result-header">
-                <h2>Répartition</h2>
-                <button id="btn-copy" class="btn-copy" onclick="copierRecap()">Copier</button>
-            </div>
-            <div id="resultat-contenu"></div>
-        </div>
+    <div class="bottom-bar">
+        <button class="btn primary big" onclick="calculer()">Calculer</button>
     </div>
+</section>
 
-    <script src="script.js?v=7"></script>
+<script src="script.js?v=9"></script>
 </body>
 </html>

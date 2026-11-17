@@ -1,167 +1,131 @@
 const SECRET = "reg@@s";
 let currentMode = "total";
 let currentVariation = 0;
-let currentBonusCible = "none";
+let selection = [];
 let dernierRecapTexte = "";
 
-/* ================= UTILITAIRES ================= */
-function formatFCFA(n) {
-    if (isNaN(n)) return "0 F";
-    return n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " F";
-}
-function rnd(min, max) {
-    return Math.random() * (max - min) + min;
-}
+const $ = (id) => document.getElementById(id);
+const num = (id) => parseFloat(String($(id).value).replace(/\s/g, "").replace(",", "."));
+const rnd = (a, b) => Math.random() * (b - a) + a;
+const r2 = (x) => Math.round(x * 100) / 100;
+const fcfa = (n) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " F";
+const signe = (n) => (n >= 0 ? "+" : "") + fcfa(n);
 
-/* ================= LOGIN ================= */
 function checkPassword() {
-    const pwd = document.getElementById("password-input").value;
-    if (pwd === SECRET) {
-        document.getElementById("login-screen").classList.remove("active");
-        document.getElementById("main-screen").classList.add("active");
+    if ($("password-input").value === SECRET) {
+        $("login-screen").classList.remove("active");
+        $("main-screen").classList.add("active");
     } else {
-        document.getElementById("error-msg").textContent = "Mot de passe incorrect.";
+        $("error-msg").textContent = "Mot de passe incorrect.";
     }
 }
 
-/* ================= SÉLECTION ISSUES ================= */
-function limitCheckboxes(selectedId) {
-    const chks = ["chk-forte", "chk-faible", "chk-nul"];
-    const count = chks.filter(id => document.getElementById(id).checked).length;
-    if (count > 2) {
-        document.getElementById(selectedId).checked = false;
-        alert("Choisissez 2 issues maximum.");
+function toggleIssue(key) {
+    const i = selection.indexOf(key);
+    if (i >= 0) selection.splice(i, 1);
+    else {
+        selection.push(key);
+        if (selection.length > 2) selection.shift();
     }
+    ["forte", "faible", "nul"].forEach(k =>
+        $("issue-" + k).classList.toggle("selected", selection.includes(k)));
 }
 
-/* ================= MODE ================= */
 function setMode(mode) {
     currentMode = mode;
-    document.getElementById("btn-mode-total").classList.toggle("active", mode === "total");
-    document.getElementById("btn-mode-gain").classList.toggle("active", mode === "gain");
-    document.getElementById("input-total").style.display = (mode === "total") ? "block" : "none";
-    document.getElementById("input-gain").style.display = (mode === "gain") ? "block" : "none";
+    $("btn-mode-total").classList.toggle("active", mode === "total");
+    $("btn-mode-gain").classList.toggle("active", mode === "gain");
+    $("input-total").classList.toggle("hidden", mode !== "total");
+    $("input-gain").classList.toggle("hidden", mode !== "gain");
 }
 
-/* ================= VARIATION ================= */
 function setVariation(val, btn) {
     currentVariation = val;
-    document.querySelectorAll(".variation-switch button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll("#variation-chips .chip").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 }
 
-/* ================= BONUS ================= */
-function setBonusCible(val) {
-    currentBonusCible = val;
-    document.getElementById("btn-bonus-none").classList.toggle("active", val === "none");
-    document.getElementById("btn-bonus-1").classList.toggle("active", val === "auto");
-    document.getElementById("bonus-montant-container").style.display = (val === "none") ? "none" : "block";
+function afficher(html) {
+    const box = $("resultats");
+    box.innerHTML = html;
+    box.classList.remove("hidden");
+    box.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/* ================= CALCUL PRINCIPAL ================= */
+function echec(msg) {
+    dernierRecapTexte = "";
+    afficher('<div class="result fail"><div class="fail-title">❌ Ça ne passe pas</div><div class="muted">' + msg + '</div></div>');
+}
+
 function calculer() {
-    const teamFav = document.getElementById("team-fav").value.trim() || "Équipe favorite";
-    const teamOut = document.getElementById("team-out").value.trim() || "Équipe perdante";
-    const resDiv = document.getElementById("resultats");
-    const resContent = document.getElementById("resultat-contenu");
-    const btnCopy = document.getElementById("btn-copy");
-
-    const echec = (msg) => {
-        resContent.innerHTML = '<div class="res-line"><span class="down">❌ Ça ne passe pas : ' + msg + '</span></div>';
-        btnCopy.style.display = "none";
-        resDiv.style.display = "block";
-        dernierRecapTexte = "";
+    const teamFav = $("team-fav").value.trim() || "Favorite";
+    const teamOut = $("team-out").value.trim() || "Adversaire";
+    const defs = {
+        forte:  { name: "Victoire Forte",  team: teamFav },
+        faible: { name: "Victoire Faible", team: teamOut },
+        nul:    { name: "Match Nul",       team: "Nul" }
     };
-    btnCopy.style.display = "";
-    resDiv.style.display = "none";
 
-    const selected = [];
-    if (document.getElementById("chk-forte").checked)  selected.push({ name: "Victoire Forte",  cote: parseFloat(document.getElementById("cote-forte").value),  team: teamFav });
-    if (document.getElementById("chk-faible").checked) selected.push({ name: "Victoire Faible", cote: parseFloat(document.getElementById("cote-faible").value), team: teamOut });
-    if (document.getElementById("chk-nul").checked)    selected.push({ name: "Match Nul",       cote: parseFloat(document.getElementById("cote-nul").value),    team: "Match Nul" });
+    if (selection.length !== 2) return echec("choisis exactement 2 issues.");
+    const sel = selection.map(k => ({ ...defs[k], cote: num("cote-" + k) }));
+    if (sel.some(s => isNaN(s.cote) || s.cote <= 1)) return echec("cotes invalides (doivent être supérieures à 1).");
 
-    if (selected.length !== 2) return echec("cochez exactement 2 issues.");
-    if (selected.some(c => isNaN(c.cote) || c.cote <= 1)) return echec("cotes invalides (> 1).");
-
-    const c1 = selected[0].cote, c2 = selected[1].cote;
+    const c1 = sel[0].cote, c2 = sel[1].cote;
     const S = 1 / c1 + 1 / c2;
+    if (S >= 1) return echec("avec ces cotes, impossible de gagner à coup sûr.");
 
-    // Bonus (free bet : mise non rendue, on touche bonus x (cote-1))
-    let B1 = 0, B2 = 0;
-    if (currentBonusCible !== "none") {
-        const b = parseFloat(document.getElementById("bonus-montant").value);
-        if (isNaN(b) || b <= 0) return echec("montant du bonus invalide.");
-        if (c1 >= c2) B1 = b; else B2 = b;
-    }
-    const k1 = B1 * (c1 - 1) / c1, k2 = B2 * (c2 - 1) / c2;
-    const k = k1 + k2;
-
-    // Montant total + gain minimum exigé
-    let T, gainBas;
+    let T, gainBas = 0;
     if (currentMode === "total") {
-        T = parseFloat(document.getElementById("montant-total").value);
+        T = num("montant-total");
         if (isNaN(T) || T <= 0) return echec("montant invalide.");
-        gainBas = 0;
     } else {
-        const gMin = parseFloat(document.getElementById("gain-min").value);
-        const gMax = parseFloat(document.getElementById("gain-max").value);
+        const gMin = num("gain-min"), gMax = num("gain-max");
         if (isNaN(gMin) || isNaN(gMax) || gMin <= 0 || gMax < gMin) return echec("gains invalides.");
-        const G = (gMin + gMax) / 2;
-        T = (G - k / S) / (1 / S - 1);
-        if (!isFinite(T) || T <= 0) return echec("ce gain n'est pas atteignable avec ces cotes.");
+        T = ((gMin + gMax) / 2) / (1 / S - 1);
         gainBas = gMin;
     }
 
-    // Mises qui égalisent le retour des 2 issues
-    const R = (T + k) / S;
-    const m1Base = R / c1 - k1;
-    const m2Base = R / c2 - k2;
-    if (m1Base < 0 || m2Base < 0) return echec("le bonus est trop élevé pour ce montant.");
+    const R = T / S;
+    const m1Base = R / c1, m2Base = R / c2;
 
-    const calc = (m1, m2) => {
-        const tot = m1 + m2;
-        return { m1, m2, tot, g1: m1 * c1 + B1 * (c1 - 1) - tot, g2: m2 * c2 + B2 * (c2 - 1) - tot };
-    };
-    const r2 = (x) => Math.round(x * 100) / 100;
-
-    // Variation anti-bot : on ne garde que les tirages où les 2 issues restent gagnantes
     let best = null;
     for (let i = 0; i <= 300 && !best; i++) {
         const amp = currentVariation * (1 - i / 300);
-        const v1 = rnd(-amp, amp), v2 = rnd(-amp, amp);
-        const r = calc(r2(m1Base * (1 + v1)), r2(m2Base * (1 + v2)));
-        if (Math.min(r.g1, r.g2) >= gainBas - 1e-9) { best = r; best.v1 = v1; best.v2 = v2; }
+        const m1 = r2(m1Base * (1 + rnd(-amp, amp)));
+        const m2 = r2(m2Base * (1 + rnd(-amp, amp)));
+        const tot = m1 + m2;
+        const g1 = m1 * c1 - tot, g2 = m2 * c2 - tot;
+        if (Math.min(g1, g2) >= gainBas - 1e-9) best = { m1, m2, tot, g: Math.min(g1, g2) };
     }
-    if (!best) return echec("pas de gain garanti avec ces cotes" + (B1 + B2 ? " et ce bonus." : "."));
+    if (!best) return echec("pas de gain garanti avec ces cotes.");
 
-    const gMin = Math.min(best.g1, best.g2);
-    const sg = (x) => (x >= 0 ? "+" : "") + formatFCFA(x);
-    const bon1 = B1 ? " (+ bonus " + formatFCFA(B1) + ")" : "";
-    const bon2 = B2 ? " (+ bonus " + formatFCFA(B2) + ")" : "";
+    const ligne = (s, m, extra) =>
+        '<div class="row"><div><div>' + s.name + '</div><div class="sub">' + s.team + ' · cote ' + s.cote + '</div></div><div class="amount">' + fcfa(m) + '</div></div>';
 
-    resContent.innerHTML = [
-        '<div class="res-line"><span>' + selected[0].name + ' (' + selected[0].team + ') @' + c1 + '</span><span class="highlight">' + formatFCFA(best.m1) + bon1 + '</span></div>',
-        '<div class="res-line"><span>' + selected[1].name + ' (' + selected[1].team + ') @' + c2 + '</span><span class="highlight">' + formatFCFA(best.m2) + bon2 + '</span></div>',
-        '<div class="res-line total"><span>Total sorti de ta poche</span><span>' + formatFCFA(best.tot) + '</span></div>',
-        '<div class="res-line"><span>Gain net garanti</span><span class="up">' + sg(gMin) + '</span></div>'
-    ].join("");
-    btnCopy.style.display = "";
-    resDiv.style.display = "block";
+    afficher(
+        '<div class="result ok">' +
+            '<div class="gain-label">Gain net garanti</div>' +
+            '<div class="gain-value">' + signe(best.g) + '</div>' +
+            ligne(sel[0], best.m1) +
+            ligne(sel[1], best.m2) +
+            '<div class="row total"><div>Total misé</div><div class="amount">' + fcfa(best.tot) + '</div></div>' +
+            '<button id="btn-copy" class="btn btn-copy" onclick="copierRecap()">Copier le rapport</button>' +
+        '</div>'
+    );
 
     dernierRecapTexte = [
         "REGIS-BET",
-        selected[0].name + " (" + selected[0].team + ") @" + c1 + " : " + formatFCFA(best.m1) + bon1,
-        selected[1].name + " (" + selected[1].team + ") @" + c2 + " : " + formatFCFA(best.m2) + bon2,
-        "Total sorti de ta poche : " + formatFCFA(best.tot),
-        "Gain net garanti : " + sg(gMin)
+        sel[0].name + " (" + sel[0].team + ") @" + c1 + " : " + fcfa(best.m1),
+        sel[1].name + " (" + sel[1].team + ") @" + c2 + " : " + fcfa(best.m2),
+        "Total misé : " + fcfa(best.tot),
+        "Gain net garanti : " + signe(best.g)
     ].join("\n");
 }
 
-/* ================= COPIE ================= */
 function copierRecap() {
-    if (!dernierRecapTexte) { alert("Calcule d'abord une répartition."); return; }
+    if (!dernierRecapTexte) return;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(dernierRecapTexte).then(() => flashCopie("Copié !")).catch(() => fallbackCopie());
+        navigator.clipboard.writeText(dernierRecapTexte).then(flashCopie).catch(fallbackCopie);
     } else {
         fallbackCopie();
     }
@@ -169,18 +133,17 @@ function copierRecap() {
 function fallbackCopie() {
     const ta = document.createElement("textarea");
     ta.value = dernierRecapTexte;
-    ta.style.position = "fixed";
-    ta.style.opacity = "0";
+    ta.style.cssText = "position:fixed;opacity:0";
     document.body.appendChild(ta);
     ta.select();
-    try { document.execCommand("copy"); flashCopie("Copié !"); }
+    try { document.execCommand("copy"); flashCopie(); }
     catch (e) { alert("Copie impossible sur ce navigateur."); }
     document.body.removeChild(ta);
 }
-function flashCopie(msg) {
-    const btn = document.getElementById("btn-copy");
+function flashCopie() {
+    const btn = $("btn-copy");
     const old = btn.textContent;
-    btn.textContent = msg;
+    btn.textContent = "Copié ✓";
     btn.classList.add("copied");
     setTimeout(() => { btn.textContent = old; btn.classList.remove("copied"); }, 1500);
 }
